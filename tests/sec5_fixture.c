@@ -5003,9 +5003,8 @@ static int recover_r1_fixtures(void) {
     printf("RECOVERY_BLOCKED owner/environment/live fixture mismatch\n");
     return 78;
   }
-  HANDLE base = open_dir(
-      L"C:\\devagents\\sec-os",
-      FILE_LIST_DIRECTORY | FILE_READ_ATTRIBUTES);
+  HANDLE base = open_dir(L"C:\\devagents\\sec-os",
+                         FILE_LIST_DIRECTORY | FILE_READ_ATTRIBUTES);
   FILE_ID_INFO identity;
   BOOL good = base != INVALID_HANDLE_VALUE &&
               GetFileInformationByHandleEx(base, FileIdInfo, &identity,
