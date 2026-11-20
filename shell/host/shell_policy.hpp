@@ -3,6 +3,7 @@
 
 #include "confined_write.hpp"
 #include "origin_policy.hpp"
+#include <cstdio>
 #include <memory>
 #include <shellapi.h>
 #include <string>
@@ -47,9 +48,14 @@ inline std::wstring HostEnvironment(const wchar_t *name) {
 inline bool VerifiedExecutable(const std::wstring &candidate,
                                std::wstring &path,
                                std::shared_ptr<confined::LockedPath> &pin) {
+  const bool dbg = GetEnvironmentVariableW(L"DA_LSP_DEBUG", nullptr, 0) > 0;
   if (candidate.size() < 3 || candidate[1] != L':' || candidate[2] != L'\\' ||
-      candidate.find_first_of(L"\"\r\n") != std::wstring::npos)
+      candidate.find_first_of(L"\"\r\n") != std::wstring::npos) {
+    if (dbg)
+      std::fwprintf(stderr, L"[verified] candidato invalido: %s\n",
+                    candidate.c_str());
     return false;
+  }
   const DWORD count = GetFullPathNameW(candidate.c_str(), 0, nullptr, nullptr);
   if (!count)
     return false;
@@ -60,9 +66,15 @@ inline bool VerifiedExecutable(const std::wstring &candidate,
     return false;
   full.resize(read);
   full = CanonicalLongPath(full);
+  if (dbg)
+    std::fwprintf(stderr, L"[verified] full=%s\n", full.c_str());
   auto locked = std::make_shared<confined::LockedPath>();
-  if (!confined::LockParents(full, *locked, false))
+  if (!confined::LockParents(full, *locked, false)) {
+    if (dbg)
+      std::fwprintf(stderr, L"[verified] LockParents rechaza %s\n",
+                    full.c_str());
     return false;
+  }
   HANDLE file = CreateFileW(full.c_str(), GENERIC_READ | FILE_READ_ATTRIBUTES,
                             FILE_SHARE_READ, nullptr, OPEN_EXISTING,
                             FILE_FLAG_OPEN_REPARSE_POINT, nullptr);
@@ -84,6 +96,10 @@ inline bool VerifiedExecutable(const std::wstring &candidate,
   if (finalPath.rfind(L"\\\\?\\", 0) == 0)
     finalPath.erase(0, 4);
   finalPath = CanonicalLongPath(finalPath);
+  if (dbg)
+    std::fwprintf(stderr, L"[verified] full=%s final=%s equal=%d regular=%d\n",
+                  full.c_str(), finalPath.c_str(),
+                  EqualPath(full, finalPath) ? 1 : 0, regular ? 1 : 0);
   if (!EqualPath(full, finalPath))
     return false;
   path = std::move(finalPath);

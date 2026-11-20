@@ -51,6 +51,7 @@ int main(int argc, char **argv) {
   DA_CHECK(GetExitCodeProcess(child.hProcess, &childExit) && childExit == 0);
   CloseHandle(child.hThread);
   CloseHandle(child.hProcess);
+  SetEnvironmentVariableW(L"DA_LSP_DEBUG", L"1");
   DA_CHECK(ResolveLsp(L"cpp", path) && EqualPath(path, lspExeCanon));
   DA_CHECK(ResolveLsp(L"clangd.exe", path) && EqualPath(path, lspExeCanon));
   DA_CHECK(ResolveLsp(lspExe, path) && EqualPath(path, lspExeCanon));

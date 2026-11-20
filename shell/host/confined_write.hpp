@@ -3,6 +3,7 @@
 
 #include <algorithm>
 #include <cstddef>
+#include <cstdio>
 #include <cstring>
 #include <cwchar>
 #include <string>
@@ -159,8 +160,13 @@ inline constexpr DWORD kMutationDirectoryShare = FILE_SHARE_READ;
 inline bool LockParents(const std::wstring &input, LockedPath &locked,
                         bool includeLeaf,
                         DWORD share = kSessionDirectoryShare) {
-  if (!Absolute(input, locked.path))
+  const bool dbg = GetEnvironmentVariableW(L"DA_LSP_DEBUG", nullptr, 0) > 0;
+  if (!Absolute(input, locked.path)) {
+    if (dbg)
+      std::fwprintf(stderr, L"[lockparents] Absolute rechaza: %s\n",
+                    input.c_str());
     return false;
+  }
   const size_t prefix = VolumePrefixLength(locked.path);
   const size_t leafSeparator = locked.path.find_last_of(L'\\');
   // A UNC share itself is a root, never a Save As filename.
@@ -179,11 +185,19 @@ inline bool LockParents(const std::wstring &input, LockedPath &locked,
         extended.c_str(), FILE_READ_ATTRIBUTES | FILE_LIST_DIRECTORY, share,
         nullptr, OPEN_EXISTING,
         FILE_FLAG_OPEN_REPARSE_POINT | FILE_FLAG_BACKUP_SEMANTICS, nullptr);
-    if (h == INVALID_HANDLE_VALUE)
+    if (h == INVALID_HANDLE_VALUE) {
+      if (dbg)
+        std::fwprintf(stderr, L"[lockparents] CreateFileW falla %s err=%lu\n",
+                      current.c_str(), GetLastError());
       return false;
+    }
     locked.handles.push_back(h);
-    if (!Validate(h, current, true))
+    if (!Validate(h, current, true)) {
+      if (dbg)
+        std::fwprintf(stderr, L"[lockparents] Validate falla %s\n",
+                      current.c_str());
       return false;
+    }
     if (end == last)
       return true;
     const size_t start = locked.path[end] == L'\\' ? end + 1 : end;
