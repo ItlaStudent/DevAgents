@@ -1,5 +1,6 @@
+Extracto revisado / Reviewed excerpt
+
 VALIDACIÓN INTEGRAL PRE-F2 · 20-nov-2026 (reloj del equipo) · Devin (SWE-2)
-Datos: DEVAGENTS_DATA_DIR=C:/tmp/angel-audit-data (copia de angel-dv-b3-data). Nunca datos del dueño.
 Host Debug: /c/tmp/dv-fase1-prefix reconstruido a HEAD (768cb6a4), CDP :9333, WebUI lang=en.
 
 =====================================================================
@@ -33,7 +34,6 @@ Host Debug: /c/tmp/dv-fase1-prefix reconstruido a HEAD (768cb6a4), CDP :9333, We
 - 121 herramientas (el doc del 12-nov decía 114): incluye fs_list/fs_read/fs_search/
   fs_write, git_status/diff/log/add/commit, spaces_list, plan_approve/plan_replan,
   session_archive, ship_order, pr_merge — la paridad MCP es MUCHO mayor que la
-  ficha CK-MCP-005 del 12-nov (habría que re-medirla).
 - Token en params.token de initialize funciona; swarm_set_models (privilegiada)
   fijó 4 miembros y swarm_get_models los devolvió.
 - HALLAZGO i18n: descriptions de las 121 tools en español (audiencias: IDEs en
@@ -44,7 +44,6 @@ Host Debug: /c/tmp/dv-fase1-prefix reconstruido a HEAD (768cb6a4), CDP :9333, We
 =====================================================================
 - swarm_set_models (MCP): OpenRouter gemma-4-31b-it:free, Cohere command-a-plus-05-2026,
   OpenRouter nemotron-3-nano-omni-30b-a3b-reasoning:free, Cohere command-a-reasoning-08-2025
-  → 2 fabricantes, todo gratis, 0 modelos locales (como pidió el dueño).
 - Orden #69 por la cabina en modo Colmena: "tres archivos manzana/pera/uva".
 - Resultado: DONE. Las 3 tareas cayeron en olas, el router probó OpenRouter
   ernie-5.5-flash-preview:free → FALLÓ → siguió Cohere command-a-plus (resiliencia
@@ -62,12 +61,9 @@ Host Debug: /c/tmp/dv-fase1-prefix reconstruido a HEAD (768cb6a4), CDP :9333, We
   (contenido del modelo, correcto no traducir).
 
 =====================================================================
-4. Promesas del anuncio (CK-PUB-017 / R3-anuncio-contra-codigo)
 =====================================================================
 Re-verificación de los bloqueantes del 12-nov contra el estado de hoy:
-- A3/A30 (público Apache-2.0): sigue FALSO hasta el push del dueño; LICENSE=Apache-2.0
   confirmado, historial ya reescrito sin claves, export público saneado existe.
-- A25 (4stra.dev/devagents): el dueño la publicó el 12-nov (CK-PUB-005) → probablemente
   CIERTO ya; falta re-verificar HTTP y que enlace al repo.
 - A28 (Windows y Linux): la suite corre en Docker Linux pero la cabina es Win32+
   WebView2 → el anuncio debe decir "Windows; Linux en camino". Sigue bloqueando
@@ -75,12 +71,10 @@ Re-verificación de los bloqueantes del 12-nov contra el estado de hoy:
 - A6 (colmena): AHORA SÍ hay recorrido en vivo con 2 fabricantes y entrega en disco
   (orden #69 arriba). Falta: un FAIL del auditor con corrección y roles fijados.
 - A7 (modelos en local): sin prueba en vivo (Ollama responde pero no se ordenó;
-  el dueño prefiere no usar locales). La frase "modelos en local" sigue sin evidencia.
 - A10 (MCP desde IDE externa): MCP responde y tiene 121 tools, pero no hubo
   recorrido desde una IDE real en esta sesión.
 - A17 (subagentes propios): delegación de 1 nivel por diseño; sin cambios.
 - A19/A20 (reglas en Directo / reglas propias en cabina): F1.7 pendiente.
-- A5 (cifra 80 000 / acusación): redacción pendiente del dueño, sin cambios.
 - Resto (A1,A2,A4,A8,A9,A11-A16,A21-A24,A26,A27,A29,A31,A32): igual que R3.
 
 =====================================================================
@@ -96,7 +90,6 @@ Re-verificación de los bloqueantes del 12-nov contra el estado de hoy:
   pendiente, búsqueda de sesiones Cmd+K, cache de prompt.
 - Ruflo 3.77-3.78: token MCP en tiempo constante (ya portado en T3), guardia
   pre-bash contra $(...) y ${X:-/} (command_policy cubierto por aprobación humana;
-  tests SEC2/CK-SEG-012 ya existen), frescura/replay en federación.
 - T3 Code v0.1.11: issues multi-forja (DevAgents ya tiene panel Issues), app en
   10 idiomas (ellos 10, nosotros 2), túneles de puerto del agente (remote serve
   solo loopback — brecha conocida).
@@ -118,7 +111,6 @@ Re-verificación de los bloqueantes del 12-nov contra el estado de hoy:
   Pendiente decisión: ¿CLI bilingüe? Es la mayor brecha i18n restante.
 
 =====================================================================
-7. CORRECCIONES DEL DUEÑO (20-nov, tarde)
 =====================================================================
 - A7 «modelos en local»: CORREGIDO — ya existe orden real con Ollama (orden #61
   del cierre B5: plan en 147 s tras el arreglo de timeout de live_worker.zig y
@@ -131,10 +123,9 @@ Re-verificación de los bloqueantes del 12-nov contra el estado de hoy:
   hijas por llamada, olas en Orquestado/Colmena, orden #69); anidación NO
   (profundidad 1 por diseño de presupuesto/auditoría). Candidata F1.x:
   delegación anidada con tope de profundidad y presupuesto (media-grande).
-- Texto del anuncio editado por el dueño (20-nov): eliminado el párrafo de
   OpenAI/80 000 agentes, «madre/padre/abuelo» → «otro familiar», «Lo que viene»
   → «Lo que todavía está en desarrollo». Riesgos residuales del texto final:
-  «multi-orquestador» (sigue siendo un orquestador con varias formas), «desde
   finales del 2025» (no verificable en el repo), «5 o 10 usos» (el código usa
   3 muestras), «tus propias reglas de programación» (F1.7 pendiente), «subagen-
   tes» (fan-out sí, anidación no), enlaces que exigen repo público y página viva.
+

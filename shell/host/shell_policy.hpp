@@ -147,9 +147,11 @@ inline const std::vector<HostProgram> &ShellRegistry() {
 
 inline bool ResolveShell(const std::wstring &selector, std::wstring &path) {
   const std::wstring key = selector.empty() ? L"cmd" : selector;
+  const std::wstring canonSelector = CanonicalLongPath(selector);
   for (const auto &program : ShellRegistry()) {
     if (EqualPath(key, program.key) || EqualPath(key, program.key + L".exe") ||
-        EqualPath(key, program.executable)) {
+        EqualPath(canonSelector, program.executable) ||
+        EqualPath(selector, program.executable)) {
       path = program.executable;
       return true;
     }
@@ -214,9 +216,13 @@ inline const std::vector<HostProgram> &LspRegistry() {
 
 inline bool ResolveLsp(const std::wstring &selector, std::wstring &path) {
   const auto *name = LspExecutable(selector);
+  // El selector puede llegar con alias 8.3 (p. ej. RUNNER~1) desde TEMP o
+  // PATH; el ejecutable del registro ya está canonizado, así que la forma
+  // larga del selector es la que se compara.
+  const std::wstring canonSelector = CanonicalLongPath(selector);
   for (const auto &program : LspRegistry()) {
     if ((name && std::wstring(name) == LspExecutable(program.key)) ||
-        EqualPath(selector, program.executable)) {
+        EqualPath(canonSelector, program.executable)) {
       path = program.executable;
       return true;
     }
