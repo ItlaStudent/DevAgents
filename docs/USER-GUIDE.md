@@ -15,7 +15,7 @@ DevAgents is an AI-powered development agent orchestrator. It takes high-level o
 ## Prerequisites
 
 - **Windows** (required — uses DPAPI for key encryption, named pipes for IPC, kernel32 for threading)
-- **Zig 0.16.0 (current)** at `C:\devagents\toolchain\zig\zig.exe`; Download Zig 0.16.0 for your platform and point `ZIG_PATH` at the executable.
+- **Zig 0.16.0** — download it for your platform and point `ZIG_PATH` at the executable.
 - **PowerShell 7+** (pwsh) for verification scripts
 
 ### Build from source

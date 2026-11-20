@@ -73,7 +73,7 @@ Resolución de directorio de datos (`--data-dir`):
   "mcpServers": {
     "devagents": {
       "command": "C:\\DevAgents\\devagents-mcp.exe",
- "args": ["--data-dir", "C:\Workspace\\Desktop\\Proyectos\\Proyecto - DevAgents"]
+ "args": ["--data-dir", "C:\\devagents\\mi-proyecto"]
     }
   }
 }
