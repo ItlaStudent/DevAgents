@@ -1,7 +1,7 @@
 """Genera los activos de marca de la cabina desde el logo real de Ad Astra.
 
-Fuente: shell/brand/logo-ico-<variante>.png (copias de
-Desktop\\Startup\\Ad Astra\\01-Marca\\Logo-ico N.png). La marca NO se dibuja a
+Fuente: shell/brand/logo-ico-<variante>.png (copias de la carpeta de
+marca del estudio). La marca NO se dibuja a
 mano: una imitación en SVG ya se confundió con el logo una vez (ver
 la bitácora interna, sesión del 22-09). Todo lo que sale de aquí es un recorte o un
 reescalado del archivo de marca.
