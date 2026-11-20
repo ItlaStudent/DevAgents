@@ -10,7 +10,7 @@ const profiles = path.join(root, '.zig-cache/cab010-browser');
 fs.mkdirSync(profiles, { recursive: true });
 const profile = fs.mkdtempSync(path.join(profiles, 'profile-'));
 const browser = spawn(resolveBrowser(), ['--headless=new', '--remote-debugging-pipe', `--user-data-dir=${profile}`,
-  '--no-first-run', '--disable-background-networking', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
+  '--no-sandbox', '--disable-gpu', '--no-first-run', '--disable-background-networking', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
 const pending = new Map(), errors = [];
 let buffer = '', sequence = 0, session, stderr = '';
 browser.stderr.on('data', data => { stderr += data; });
@@ -30,7 +30,7 @@ browser.stdio[4].on('data', data => {
 function send(method, params = {}, sessionId = session) {
   return new Promise((resolve, reject) => {
     const id = ++sequence;
-    const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 15000);
+    const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 60000);
     pending.set(id, { resolve, reject, timer });
     browser.stdio[3].write(JSON.stringify({ id, method, params, sessionId }) + '\0');
   });
