@@ -44,6 +44,14 @@ module.exports = async function versionUi() {
     const {targetId} = await send('Target.createTarget', {url: pathToFileURL(html).href}, undefined);
     session = (await send('Target.attachToTarget', {targetId, flatten:true}, undefined)).sessionId;
     await send('Page.enable');
+    // La navegacion al file:// confirma de forma asincrona: un evaluate puede
+    // caer en el contexto vacio inicial y el siguiente ya en el documento
+    // cargado (allí window.versionUi no existe). Se espera al contexto nuevo.
+    for (let i = 0; i < 100; i++) {
+      const ready = await evaluate(`document.readyState==='complete' && location.pathname.endsWith('version.html')`).catch(() => false);
+      if (ready) break;
+      await new Promise(r => setTimeout(r, 50));
+    }
     await send('Emulation.setDeviceMetricsOverride', {width:1100,height:650,deviceScaleFactor:1,mobile:false});
     const bundle = fs.readFileSync(path.join(__dirname, '../shell/webui/dist/version.test.cjs'), 'utf8');
     await evaluate(`(() => { const module={exports:{}};new Function('module','exports',${JSON.stringify(bundle)})(module,module.exports);window.versionUi=module.exports;})()`);
