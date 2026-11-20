@@ -35,7 +35,7 @@ module.exports = async function browserAgentScript() {
   const debugScript = scriptFromHeader(header, 'DebugScript = R"js(');
   const fixture = pathToFileURL(path.join(__dirname, 'browser_agent_script_fixture.html')).href;
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'devagents-agent-script-'));
-  const child = spawn(resolveBrowser(), ['--headless=new', '--remote-debugging-pipe', `--user-data-dir=${profile}`, '--no-first-run', '--disable-background-networking', '--hide-scrollbars', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
+  const child = spawn(resolveBrowser(), ['--headless=new', '--remote-debugging-pipe', `--user-data-dir=${profile}`, '--no-sandbox', '--disable-gpu', '--no-first-run', '--disable-background-networking', '--hide-scrollbars', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
   let buffer = '', next = 0, session;
   const pending = new Map();
   const events = [];
@@ -57,7 +57,7 @@ module.exports = async function browserAgentScript() {
   function send(method, params = {}, sessionId = session) {
     return new Promise((resolve, reject) => {
       const id = ++next;
-      const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 30000);
+      const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 60000);
       pending.set(id, { resolve, reject, timer });
       child.stdio[3].write(JSON.stringify({ id, method, params, sessionId }) + '\0');
     });

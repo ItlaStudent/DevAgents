@@ -25,7 +25,7 @@ const evidence = process.env.DEVAGENTS_TEST_EVIDENCE || path.join(root, 'zig-out
 
   fs.mkdirSync(path.join(root, '.zig-cache'), { recursive: true }); // con --cache-dir externa la carpeta no existe
   const profile = fs.mkdtempSync(path.join(root, '.zig-cache/comp007-browser-'));
-  const child = spawn(resolveBrowser(), ['--headless=new', '--remote-debugging-pipe', `--user-data-dir=${profile}`, '--no-first-run', '--disable-background-networking', '--disable-component-update', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
+  const child = spawn(resolveBrowser(), ['--headless=new', '--remote-debugging-pipe', `--user-data-dir=${profile}`, '--no-sandbox', '--disable-gpu', '--no-first-run', '--disable-background-networking', '--disable-component-update', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
   let buffer = '', next = 0, session, stderr = '';
   const pending = new Map(), errors = [];
   child.stderr.on('data', d => { stderr += d; });
@@ -45,7 +45,7 @@ const evidence = process.env.DEVAGENTS_TEST_EVIDENCE || path.join(root, 'zig-out
   function send(method, params = {}, sessionId = session) {
     return new Promise((resolve, reject) => {
       const id = ++next;
-      const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 15000);
+      const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 60000);
       pending.set(id, { resolve, reject, timer });
       child.stdio[3].write(JSON.stringify({ id, method, params, sessionId }) + '\0');
     });

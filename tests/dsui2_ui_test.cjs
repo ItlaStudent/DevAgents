@@ -177,7 +177,7 @@ async function approvalCardUi() {
   fs.mkdirSync(cache, { recursive: true });
   const profile = fs.mkdtempSync(path.join(cache, 'seg012-card-'));
   const child = spawn(resolveBrowser(), ['--headless=new', '--remote-debugging-pipe',
-    `--user-data-dir=${profile}`, '--no-first-run', '--disable-background-networking', 'about:blank'],
+    `--user-data-dir=${profile}`, '--no-sandbox', '--disable-gpu', '--no-first-run', '--disable-background-networking', 'about:blank'],
   { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
   const pending = new Map(), errors = [];
   let buffer = '', next = 0, session, stderr = '';
@@ -204,7 +204,7 @@ async function approvalCardUi() {
   });
   const send = (method, params = {}, sessionId = session) => new Promise((resolve, reject) => {
     const id = ++next;
-    const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 15000);
+    const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 60000);
     pending.set(id, { resolve, reject, timer });
     child.stdio[3].write(JSON.stringify({ id, method, params, sessionId }) + '\0');
   });

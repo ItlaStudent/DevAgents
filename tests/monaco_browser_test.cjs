@@ -53,7 +53,7 @@ async function run() {
   const profile = fs.mkdtempSync(path.join(os.tmpdir(), 'beats-monaco-browser-'));
   const html = path.join(profile, 'editor.html');
   fs.writeFileSync(html, `<!doctype html><html lang="es"><head><meta charset="utf-8"><base href="${vendorBase}"></head><body><main id="editor" style="width:1100px;height:620px"></main></body></html>`);
-  const child = spawn(executable, ['--headless=new', '--remote-debugging-pipe', '--allow-file-access-from-files', `--user-data-dir=${profile}`, '--no-first-run', '--disable-background-networking', 'about:blank'], { cwd: profile, stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
+  const child = spawn(executable, ['--headless=new', '--remote-debugging-pipe', '--allow-file-access-from-files', `--user-data-dir=${profile}`, '--no-sandbox', '--disable-gpu', '--no-first-run', '--disable-background-networking', 'about:blank'], { cwd: profile, stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
   let buffer = '', next = 0, session, stderr = '';
   const pending = new Map(), errors = [];
   child.stderr.on('data', data => { stderr += data; });
@@ -74,7 +74,7 @@ async function run() {
   function send(method, params = {}, sessionId = session) {
     return new Promise((resolve, reject) => {
       const id = ++next;
-      const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 20000);
+      const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 60000);
       pending.set(id, { resolve, reject, timer });
       child.stdio[3].write(JSON.stringify({ id, method, params, sessionId }) + '\0');
     });

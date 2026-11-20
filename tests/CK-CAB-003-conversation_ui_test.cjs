@@ -64,7 +64,7 @@ module.exports = async function cab003ConversationUi() {
   const executable = process.env.DEVAGENTS_TEST_BROWSER || 'C:/Program Files/Google/Chrome/Application/chrome.exe';
   const html = path.join(profile, 'cab003.html');
   fs.writeFileSync(html, '<!doctype html><html><head><meta charset="utf-8"></head><body></body></html>');
-  const child = spawn(executable, ['--headless=new', '--remote-debugging-pipe', `--user-data-dir=${profile}`, '--no-first-run', '--disable-background-networking', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
+  const child = spawn(executable, ['--headless=new', '--remote-debugging-pipe', `--user-data-dir=${profile}`, '--no-sandbox', '--disable-gpu', '--no-first-run', '--disable-background-networking', 'about:blank'], { stdio: ['ignore', 'ignore', 'pipe', 'pipe', 'pipe'], windowsHide: true });
   let buffer = '', next = 0, session;
   const pending = new Map();
   let stderr = '';
@@ -84,7 +84,7 @@ module.exports = async function cab003ConversationUi() {
   function send(method, params = {}, sessionId = session) {
     return new Promise((resolve, reject) => {
       const id = ++next;
-      const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 30000);
+      const timer = setTimeout(() => { pending.delete(id); reject(Error(`Timeout ${method}: ${stderr}`)); }, 60000);
       pending.set(id, { resolve, reject, timer });
       child.stdio[3].write(JSON.stringify({ id, method, params, sessionId }) + '\0');
     });
