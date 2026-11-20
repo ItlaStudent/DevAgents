@@ -15,7 +15,7 @@ DevAgents is an AI-powered development agent orchestrator. It takes high-level o
 ## Prerequisites
 
 - **Windows** (required — uses DPAPI for key encryption, named pipes for IPC, kernel32 for threading)
-- **Zig 0.16.0 (current)** at `C:\Workspace\Desktop\Proyectos\Proyecto - Model Zig\zig-0.16.0\zig-x86_64-windows-0.16.0\zig.exe`; the earlier `Proyecto - Zig Super Agent` path above in the first edition is historical. Source: `las reglas del repositorio:80`.
+- **Zig 0.16.0 (current)** at `C:\devagents\toolchain\zig\zig.exe`; Download Zig 0.16.0 for your platform and point `ZIG_PATH` at the executable.
 - **PowerShell 7+** (pwsh) for verification scripts
 
 ### Build from source
@@ -31,7 +31,7 @@ For current builds, use a fresh cache per session at `%LOCALAPPDATA%\Temp\beats-
 ```powershell
 $session = Get-Date -Format 'yyyyMMdd-HHmmss'
 $cache = Join-Path $env:LOCALAPPDATA "Temp\beats-cache-$session"
-$env:ZIG_PATH = "C:\Workspace\Desktop\Proyectos\Proyecto - Model Zig\zig-0.16.0\zig-x86_64-windows-0.16.0\zig.exe"
+$env:ZIG_PATH = "C:\devagents\toolchain\zig\zig.exe"
 $env:DEVAGENTS_HOOK_CACHE = $cache
 & $env:ZIG_PATH build -j1 --cache-dir $cache
 ```
@@ -98,7 +98,7 @@ The verification block below records the original 185-test migration snapshot an
 ```powershell
 $session = Get-Date -Format 'yyyyMMdd-HHmmss'
 $cache = Join-Path $env:LOCALAPPDATA "Temp\beats-cache-$session"
-$env:ZIG_PATH = "C:\Workspace\Desktop\Proyectos\Proyecto - Model Zig\zig-0.16.0\zig-x86_64-windows-0.16.0\zig.exe"
+$env:ZIG_PATH = "C:\devagents\toolchain\zig\zig.exe"
 $env:DEVAGENTS_HOOK_CACHE = $cache
 & $env:ZIG_PATH build test -j1 --cache-dir $env:DEVAGENTS_HOOK_CACHE --summary all
 ```

@@ -12,7 +12,7 @@ Documento de referencia para integradores y clientes MCP externos (Claude Code, 
 
 ```powershell
 # Invocación directa
-devagents-mcp.exe --data-dir "C:\Workspace\AppData\Local\DevAgents"
+devagents-mcp.exe --data-dir "%LOCALAPPDATA%\DevAgents"
 
 # Invocación con CWD arbitrario (neutralidad CWD)
 Set-Location C:\

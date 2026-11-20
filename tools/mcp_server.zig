@@ -6258,7 +6258,7 @@ test "CK-SEG-012 H7 MCP tools only harden external limits paths mounts and webho
         }
     }
     // mount_add: sin raiz ya registrada por la cabina se rechaza con mensaje de cabina.
-    const mount = "{\"jsonrpc\":\"2.0\",\"id\":7,\"method\":\"tools/call\",\"params\":{\"name\":\"mount_add\",\"arguments\":{\"path\":\"C:/DevAgents-wt/otra-raiz\"}}}";
+    const mount = "{\"jsonrpc\":\"2.0\",\"id\":7,\"method\":\"tools/call\",\"params\":{\"name\":\"mount_add\",\"arguments\":{\"path\":\"C:/devagents/otra-raiz\"}}}";
     const mount_response = (try processRequest(a, mount, &ctx)) orelse return error.MissingResponse;
     defer a.free(mount_response);
     try std.testing.expect(std.mem.indexOf(u8, mount_response, "cabina") != null);

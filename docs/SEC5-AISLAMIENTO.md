@@ -470,7 +470,7 @@ Entradas que deben transmitir contrato sin contarse como otro spawn: `browser_ga
 Una vez implementado el paso, desde este worktree y **fuera del sandbox de Codex**, con usuario estándar:
 
 ```powershell
-& 'C:\Workspace\Desktop\Proyectos\Proyecto - Model Zig\zig-0.16.0\zig-x86_64-windows-0.16.0\zig.exe' build test-sec5-os -j1 --cache-dir "$env:LOCALAPPDATA\Temp\beats-cache-suite" --prefix "$env:LOCALAPPDATA\Temp\beats-dev-out-suite" --summary all
+& 'C:\devagents\toolchain\zig\zig.exe' build test-sec5-os -j1 --cache-dir "$env:LOCALAPPDATA\Temp\beats-cache-suite" --prefix "$env:LOCALAPPDATA\Temp\beats-dev-out-suite" --summary all
 ```
 
 La corrida se captura con stdout/stderr completos y `EXIT_CODE` bajo `la documentación interna`, usando un wrapper de evidencia del worktree al implementar. Ese wrapper comprueba espacio antes del build y guarda comando, token representativo, bytes libres, versión del SO, binarios/hashes, casos/control, errores, conteos, skips, limpieza y código final. No resolver `test-sec5-os` mediante `tools/suite_evidence.ps1 -Target`, cuyo ValidateSet actual no lo acepta; el wrapper nuevo usará el comando anterior. No escribir logs artificiales como si fueran ejecuciones.
@@ -478,7 +478,7 @@ La corrida se captura con stdout/stderr completos y `EXIT_CODE` bajo `la documen
 Después de P1 y de cada restauración de mutación: `zig fmt --check` de los `.zig` tocados; al final, suite global exacta:
 
 ```powershell
-pwsh -NoProfile -File tools/suite_evidence.ps1 -Mode suite-loaded -Topic sec5-p1-full -EvidenceDirectory 'C:\Workspace\Desktop\Proyectos\DevAgents-wt\sec-os\la documentación interna'
+pwsh -NoProfile -File tools/suite_evidence.ps1 -Mode suite-loaded -Topic sec5-p1-full -EvidenceDirectory 'C:\devagents\sec-os\evidencia'
 ```
 
 La suite también exige espacio antes de compilar. Guardar **todas** las salidas, rojas incluidas; por cada mutación conservar rojo, restauración de configuración/hashes y verde posterior. El constructor añadirá únicamente marca BUILD append-only con evidencia real, nunca AUDIT. No se escribirá BUILD PASS para una suite no ejecutada. Integración y commits pertenecen al coordinador.
@@ -852,7 +852,7 @@ Cross-lease usa ahora un fixture completo separado, con su copia privada y dos p
 Recuperación de los restos concretos de R1/R1B, con usuario estándar y sin otra ejecución SEC5 activa:
 
 ```powershell
-Set-Location -LiteralPath 'C:\Workspace\Desktop\Proyectos\DevAgents-wt\sec-os'
+Set-Location -LiteralPath 'C:\devagents\sec-os'
 & .\zig-out\bin\sec5-os.exe recover
 ```
 

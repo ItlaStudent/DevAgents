@@ -25,7 +25,7 @@ Compilar únicamente el host (requiere la DLL del motor existente junto al
 ejecutable para una cabina completa), sin reconstruir el motor:
 
 ```powershell
-$zig = 'C:\Workspace\Desktop\Proyectos\Proyecto - Model Zig\zig-0.16.0\zig-x86_64-windows-0.16.0\zig.exe'
+$zig = 'C:\devagents\toolchain\zig\zig.exe'
 $cache = Join-Path $env:LOCALAPPDATA ('Temp\beats-cache-sec-webview-' + [guid]::NewGuid.ToString('N'))
 if ((Get-PSDrive C).Free -lt 20GB) { throw 'Espacio insuficiente para compilar' }
 & $zig build shell-host-only -Doptimize=Debug -j1 --cache-dir "$cache\local" --global-cache-dir "$cache\global" --summary all
