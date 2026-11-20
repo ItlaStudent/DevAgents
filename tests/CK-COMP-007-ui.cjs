@@ -100,6 +100,6 @@ const evidence = process.env.DEVAGENTS_TEST_EVIDENCE || path.join(root, 'zig-out
       await exited;
     }
     assert(profile.startsWith(path.join(root, '.zig-cache') + path.sep), 'Browser profile must stay inside this worktree');
-    fs.rmSync(profile, { recursive: true, force: true });
+    try { fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); } catch (_) { /* Chromium suelta el perfil de forma asincrona en Windows */ }
   }
 })().catch(e => { console.error(e); process.exitCode = 1; });

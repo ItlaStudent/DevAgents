@@ -173,8 +173,7 @@ async function run() {
     fail(Error('Browser closed'));
     if (stderr) console.log('BROWSER_STDERR=' + stderr);
     assert(path.resolve(profile).startsWith(path.resolve(os.tmpdir()) + path.sep), 'Cleanup must remain in temporary directory');
-    fs.rmSync(profile, { recursive: true, force: true });
-    console.log('TEMP_REMOVED=' + profile);
+    try { fs.rmSync(profile, { recursive: true, force: true, maxRetries: 10, retryDelay: 200 }); console.log('TEMP_REMOVED=' + profile); } catch (_) { /* Chromium suelta el perfil de forma asincrona en Windows */ }
   }
 }
 if (require.main === module) run().catch(error => { console.error(error); process.exitCode = 1; });

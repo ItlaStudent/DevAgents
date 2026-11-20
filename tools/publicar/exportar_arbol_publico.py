@@ -11,7 +11,7 @@ from urllib.parse import unquote, urlsplit
 
 HERE = Path(__file__).resolve().parent
 EVIDENCE_ROOT = 'evolving/evidencia/'
-EVIDENCE_DOCS = ('README.md', 'README.es.md', 'docs/USER-GUIDE.md')
+EVIDENCE_DOCS = ('README.md', 'README.en.md', 'README.es.md', 'docs/USER-GUIDE.md')
 DENIED_DIRS = (
     '.git', 'node_modules', 'dist', 'zig-out', '.zig-cache', 'devagents-workspace',
 )
