@@ -31,6 +31,9 @@ int main(int argc, char **argv) {
   static Cleanup cleanup{fixture};
   DA_CHECK(CreateDirectoryW(fixture.c_str(), nullptr));
   const auto lspExe = fixture + L"\\clangd.exe";
+  // ResolveLsp devuelve la forma canónica larga; TEMP puede traer nombres
+  // cortos 8.3 (RUNNER~1) en algunos equipos, así que se compara normalizado.
+  const std::wstring lspExeCanon = CanonicalLongPath(lspExe);
   DA_CHECK(CopyFileW(cmd.c_str(), lspExe.c_str(), TRUE));
   const auto oldPath = HostEnvironment(L"PATH");
   DA_CHECK(SetEnvironmentVariableW(L"PATH", fixture.c_str()));
@@ -48,9 +51,9 @@ int main(int argc, char **argv) {
   DA_CHECK(GetExitCodeProcess(child.hProcess, &childExit) && childExit == 0);
   CloseHandle(child.hThread);
   CloseHandle(child.hProcess);
-  DA_CHECK(ResolveLsp(L"cpp", path) && EqualPath(path, lspExe));
-  DA_CHECK(ResolveLsp(L"clangd.exe", path) && EqualPath(path, lspExe));
-  DA_CHECK(ResolveLsp(lspExe, path) && EqualPath(path, lspExe));
+  DA_CHECK(ResolveLsp(L"cpp", path) && EqualPath(path, lspExeCanon));
+  DA_CHECK(ResolveLsp(L"clangd.exe", path) && EqualPath(path, lspExeCanon));
+  DA_CHECK(ResolveLsp(lspExe, path) && EqualPath(path, lspExeCanon));
   DA_CHECK(SetEnvironmentVariableW(L"PATH", oldPath.c_str()));
   // La copia sólo prueba resolución; jamás se ejecuta como servidor.
   DA_CHECK(!DeleteFileW(lspExe.c_str()) &&

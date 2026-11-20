@@ -15,6 +15,21 @@ inline bool EqualPath(const std::wstring &a, const std::wstring &b) {
   return CompareStringOrdinal(a.c_str(), -1, b.c_str(), -1, TRUE) == CSTR_EQUAL;
 }
 
+// GetFullPathNameW conserva nombres cortos 8.3 (p. ej. RUNNER~1) mientras que
+// GetFinalPathNameByHandleW los resuelve a su forma larga; sin normalizar,
+// EqualPath rechaza el mismo archivo. GetLongPathNameW unifica ambas formas.
+inline std::wstring CanonicalLongPath(const std::wstring &in) {
+  if (in.size() >= 32767)
+    return in;
+  std::wstring out(32768, L'\0');
+  const DWORD n =
+      GetLongPathNameW(in.c_str(), out.data(), static_cast<DWORD>(out.size()));
+  if (!n || n >= out.size())
+    return in;
+  out.resize(n);
+  return out;
+}
+
 inline std::wstring HostEnvironment(const wchar_t *name) {
   const DWORD size = GetEnvironmentVariableW(name, nullptr, 0);
   if (!size)
@@ -44,6 +59,7 @@ inline bool VerifiedExecutable(const std::wstring &candidate,
   if (!read || read >= count)
     return false;
   full.resize(read);
+  full = CanonicalLongPath(full);
   auto locked = std::make_shared<confined::LockedPath>();
   if (!confined::LockParents(full, *locked, false))
     return false;
@@ -67,6 +83,7 @@ inline bool VerifiedExecutable(const std::wstring &candidate,
   finalPath.resize(finalSize);
   if (finalPath.rfind(L"\\\\?\\", 0) == 0)
     finalPath.erase(0, 4);
+  finalPath = CanonicalLongPath(finalPath);
   if (!EqualPath(full, finalPath))
     return false;
   path = std::move(finalPath);

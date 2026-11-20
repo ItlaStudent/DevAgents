@@ -7394,15 +7394,12 @@ const SSE_OK_BODY =
     "\n";
 
 fn servidorRateLimit(ctx: *RateLimitFixtureCtx) void {
-    // Mismo patrón que servidorSordo: el Server de este Zig no expone su
-    // dirección, así que se prueban unos puertos por si alguno está ocupado.
-    var puerto: u16 = 49951;
-    var server = while (puerto < 49961) : (puerto += 1) {
-        var addr = std.Io.net.IpAddress.parse("127.0.0.1", puerto) catch continue;
-        break std.Io.net.IpAddress.listen(&addr, ctx.io, .{}) catch continue;
-    } else return;
+    // Puerto efímero: los rangos fijos chocan con las reservas dinámicas de
+    // Windows (Hyper-V/WSL) en máquinas compartidas y runners de CI.
+    var addr = std.Io.net.IpAddress.parse("127.0.0.1", 0) catch return;
+    var server = std.Io.net.IpAddress.listen(&addr, ctx.io, .{}) catch return;
     defer server.deinit(ctx.io);
-    ctx.port = puerto;
+    ctx.port = server.socket.address.getPort();
     ctx.listo.store(true, .release);
     while (!ctx.parar.load(.acquire)) {
         var stream = server.accept(ctx.io) catch |err| switch (err) {
@@ -7759,21 +7756,12 @@ const JsonLocalFixtureCtx = struct {
 };
 
 fn servidorJsonLocal(ctx: *JsonLocalFixtureCtx) void {
-    // 50060-50159 y 50260-50359 están excluidos por Windows (Hyper-V/WSL
-    // reserva rangos dinámicos — verificado con netsh); 50201-50210 queda
-    // libre. Mismo patrón de sondeo que servidorRateLimit/servidorSordo.
-    var puerto: u16 = 50201;
-    var server = while (puerto < 50211) : (puerto += 1) {
-        var addr = std.Io.net.IpAddress.parse("127.0.0.1", puerto) catch continue;
-        break std.Io.net.IpAddress.listen(&addr, ctx.io, .{}) catch |e| {
-            ctx.fallos_bind += 1;
-            const nombre = @errorName(e);
-            @memcpy(ctx.ultimo_fallo[0..nombre.len], nombre);
-            continue;
-        };
-    } else return;
+    // Puerto efímero: Windows reserva rangos dinámicos (Hyper-V/WSL) en
+    // máquinas compartidas y runners de CI; el 0 deja elegir al SO.
+    var addr = std.Io.net.IpAddress.parse("127.0.0.1", 0) catch return;
+    var server = std.Io.net.IpAddress.listen(&addr, ctx.io, .{}) catch return;
     defer server.deinit(ctx.io);
-    ctx.port = puerto;
+    ctx.port = server.socket.address.getPort();
     ctx.listo.store(true, .release);
     while (!ctx.parar.load(.acquire)) {
         var stream = server.accept(ctx.io) catch |err| switch (err) {

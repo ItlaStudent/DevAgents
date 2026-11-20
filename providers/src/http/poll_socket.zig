@@ -222,13 +222,12 @@ const CtxSordo = struct {
 /// `providers` dependa de `core` para un test invertiría la dirección de las
 /// capas.
 fn servidorSordo(ctx: *CtxSordo) void {
-    var puerto: u16 = 49751;
-    var server = while (puerto < 49771) : (puerto += 1) {
-        var addr = std.Io.net.IpAddress.parse("127.0.0.1", puerto) catch continue;
-        break std.Io.net.IpAddress.listen(&addr, ctx.io, .{}) catch continue;
-    } else return;
+    // Puerto efímero: los rangos fijos chocan con las reservas dinámicas de
+    // Windows (Hyper-V/WSL) en máquinas compartidas y runners de CI.
+    var addr = std.Io.net.IpAddress.parse("127.0.0.1", 0) catch return;
+    var server = std.Io.net.IpAddress.listen(&addr, ctx.io, .{}) catch return;
     defer server.deinit(ctx.io);
-    ctx.puerto = puerto;
+    ctx.puerto = server.socket.address.getPort();
     ctx.listo.store(true, .release);
 
     var stream = server.accept(ctx.io) catch return;
