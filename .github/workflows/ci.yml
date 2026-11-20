@@ -145,6 +145,18 @@ jobs:
       - name: Pruebas rápidas del host, MCP y proveedores
         run: zig build test-origin-policy test-bridge-policy test-mcp test-hunk-mgr test-doc-mgr test-pty-mgr test-lsp-client test-app-windows test-providers -j1 --cache-dir "$env:ZIG_CACHE" --prefix "$env:CI_PREFIX" --summary all
 
+      # Si el envoltorio de la suite falla al limpiar tras tests en verde,
+      # el traceback queda en suite-cleanup/ dentro de la cache de Zig.
+      # Subirlo solo en fallo: es la unica via de ver la causa en el runner.
+      - name: Diagnóstico de la suite (logs de limpieza)
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: suite-cleanup-logs
+          path: ${{ env.ZIG_CACHE }}/suite-cleanup/
+          if-no-files-found: ignore
+          retention-days: 7
+
   nocturno:
     name: Suite completa (nocturna)
     if: ${{ (github.event_name == 'schedule' && github.event.repository.visibility == 'public') || (github.event_name == 'workflow_dispatch' && inputs.suite_completa) }}
@@ -194,3 +206,12 @@ jobs:
       # se reproducen.
       - name: Suite completa
         run: zig build test -j1 --cache-dir "$env:ZIG_CACHE" --prefix "$env:CI_PREFIX" --summary all
+
+      - name: Diagnóstico de la suite (logs de limpieza)
+        if: failure()
+        uses: actions/upload-artifact@ea165f8d65b6e75b540449e92b4886f43607fa02 # v4
+        with:
+          name: suite-cleanup-logs
+          path: ${{ env.ZIG_CACHE }}/suite-cleanup/
+          if-no-files-found: ignore
+          retention-days: 7

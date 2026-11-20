@@ -88,8 +88,10 @@ def main():
     # T9 fase B: en Linux no hay LOCALAPPDATA; la carpeta temporal del sistema
     # (TMPDIR o /tmp) cumple el mismo papel.
     temp_parent = Path(os.environ["LOCALAPPDATA"]) / "Temp" if os.name == "nt" else Path(tempfile.gettempdir())
-    with tempfile.TemporaryDirectory(prefix="beats-suite-run-", dir=temp_parent) as root, \
-            tempfile.TemporaryDirectory(prefix="beats-suite-profile-", dir=temp_parent) as profile_root:
+    root_dir = tempfile.TemporaryDirectory(prefix="beats-suite-run-", dir=temp_parent)
+    profile_dir = tempfile.TemporaryDirectory(prefix="beats-suite-profile-", dir=temp_parent)
+    with root_dir as root, \
+            profile_dir as profile_root:
         Path(root).resolve().relative_to(temp_parent.resolve())
         env = os.environ.copy()
         env.update(DEVAGENTS_TEST_REAL_CLI_FORBIDDEN="1", DEVAGENTS_TEST_FIXTURE_DIR=root,
@@ -159,7 +161,21 @@ def main():
             return code
         finally:
             cleanup_started = time.monotonic()
-            remove_worktrees(Path(root))
+            # En Windows los procesos nieto del test (CLI, MCP, fixtures)
+            # pueden seguir vivos un instante y bloquear el retiro de
+            # worktrees o el borrado de las carpetas temporales. Sin
+            # reintento el envoltorio devolvia != 0 aunque todos los tests
+            # hubieran pasado (runs alojados 44807359832 y 44817253297).
+            for attempt in range(20):
+                try:
+                    remove_worktrees(Path(root))
+                    root_dir.cleanup()
+                    profile_dir.cleanup()
+                    break
+                except (OSError, subprocess.CalledProcessError):
+                    if attempt == 19:
+                        raise
+                    time.sleep(0.5)
             print(f"TEST_TEMP_CLEANUP={root} WORKTREE_CLEANUP_S={time.monotonic() - cleanup_started:.3f}", file=sys.stderr, flush=True)
 
 
