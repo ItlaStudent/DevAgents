@@ -123,6 +123,8 @@ async function run() {
       window.fixtureBridge=[];window.fixtureCalls=[];window.fixtureRoot='C:/fixture/Proyecto-31';window.fixtureRemote=false;window.fixtureQuota=0;window.fixtureApprovalError=false;window.fixtureOrderId=31;
       window.fixtureApprovals=[{id:310,order_id:31,description:'CAB031 aprobar script',command_prefix:'worktree_script',args_json:'{}'}];
       window.fixtureIntervals=[];window.setInterval=(fn,ms)=>{window.fixtureIntervals.push({fn,ms});return window.fixtureIntervals.length};window.clearInterval=()=>{};
+      // chrome --headless=new reporta document.hidden=true; la cabina simulada esta visible.
+      Object.defineProperty(document,'hidden',{configurable:true,get:()=>false});
       window.fixtureCore=new Proxy({}, {get:(_,method)=>async(...args)=>{
         window.fixtureCalls.push({method,args});
         if(method==='pendingApprovals'&&window.fixtureMonitorGate)await window.fixtureMonitorGate;
