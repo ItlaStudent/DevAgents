@@ -1,0 +1,21 @@
+{
+  "name": "beats-webui",
+  "version": "0.1.0",
+  "private": true,
+  "type": "module",
+  "scripts": {
+    "build": "node esbuild.config.mjs",
+    "test": "npm run test:security",
+    "test:security": "node --test tests/security.test.mjs tests/bridge_inventory.test.mjs"
+  },
+  "devDependencies": {
+    "@xterm/addon-fit": "^0.11.0",
+    "@xterm/xterm": "^6.0.0",
+    "esbuild": "^0.25.0",
+    "monaco-editor": "^0.56.0",
+    "typescript": "^5.7.0"
+  },
+  "overrides": {
+    "dompurify": "^3.4.17"
+  }
+}

@@ -1,0 +1,5 @@
+// Icono del ejecutable: lo que ven el Explorador, los accesos directos, la
+// barra de tareas anclada y Alt+Tab antes de que la ventana cargue el suyo.
+// Window registra y asigna este mismo recurso a todas las ventanas.
+// Lo genera tools/brand/generate_brand_assets.py desde el logo real.
+1 ICON "devagents.ico"

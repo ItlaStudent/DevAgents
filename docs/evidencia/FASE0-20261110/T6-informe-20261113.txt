@@ -1,0 +1,7 @@
+Extracto revisado / Reviewed excerpt
+
+  Revisión: app_server_start pasa por command_policy.decide y la aprobación del usuario como run_command, inicia el
+  sandbox del espacio, rechaza origen no confiable y marca app_server_logs como contenido externo. Sin objeciones.
+  Suite completa 2 (caché nueva t6-suite2): 149/149 pasos, 2450/2450 pruebas, EXIT=0 (T6-suite-completa-20261113-r2.txt).
+  Sigue SIN verificar: las herramientas nuevas contra WebView2 dentro de DevAgents con una orden real (lo cubren el
+  script en Chromium real y las pruebas del host; el recorrido en vivo queda para la ronda final en vivo).

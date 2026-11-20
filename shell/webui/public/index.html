@@ -1,0 +1,48 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <!-- `img-src 'self' data:` es explícito: sin él, `default-src` hace de
+       respaldo y bloquea CUALQUIER imagen en data URI, incluido el favicon de
+       aquí abajo. `data:` no permite tráfico remoto — solo contenido que ya
+       viaja dentro de este documento— así que no relaja la política de fondo,
+       que sigue siendo "nada de fuera". -->
+  <!-- worker-src blob: es necesario para los workers de Monaco (el AMD build
+       los crea via Blob+importScripts). Sin él, default-src 'self' los bloquea
+       y Monaco degrada a edición síncrona sin servicios de lenguaje. -->
+  <!-- Monaco crea estilos dinámicos para geometría/decoraciones del editor;
+       la cabina también usa style en sus plantillas. style-src conserva inline
+       por esos usos. Ningún script ni controlador inline tiene autorización. -->
+  <!-- Monaco incorpora Codicon como data:font/ttf; data: sólo se permite para imágenes/fuentes. -->
+  <meta http-equiv="Content-Security-Policy" content="default-src 'self' https://devagents.local; style-src 'self' 'unsafe-inline'; script-src 'self' https://devagents.local; img-src 'self' data:; worker-src 'self' blob:; font-src 'self' https://devagents.local data:; base-uri 'none'; form-action 'none';">
+  <title>DevAgents</title>
+  <!-- Sin esto, WebView2 pide /favicon.ico en cada arranque y la consola abre
+       siempre con un ERR_FILE_NOT_FOUND. No rompe nada, pero una consola que
+       nace con un error en rojo hace que se ignoren los errores de verdad.
+       Es el núcleo del logo real (brand/mark.png, mismo origen: `img-src
+       'self'` lo permite); antes era un SVG en data URI que imitaba la marca. -->
+  <link rel="icon" type="image/png" href="brand/mark.png">
+  <!-- xterm.css va en <head> y no en <body>: la cabina reescribe el body
+       entero al pintar el diseño (renderLayout), y la <link> que vivía ahí
+       desaparecía con él. Sin sus estilos, xterm enseñaba sus piezas internas
+       —el medidor de caracteres como una fila de letras repetidas, el área de
+       texto auxiliar como un cuadrito— y cortaba mal las líneas (22-09). -->
+  <link rel="stylesheet" href="vendor/xterm/xterm.css">
+  <style>
+    /* Solo el fondo inicial, para que no haya destello blanco antes de que el
+       bundle inyecte la hoja de estilos y aplique el tema guardado.
+       El resto del sistema visual vive en src/design/stylesheet.ts. */
+    :root { color-scheme: dark; }
+    html, body { width: 100%; height: 100%; margin: 0; overflow: hidden; background: #0a0a0a; }
+  </style>
+</head>
+<body>
+  <!-- xterm.js vendored (ADR-B012): UMD, registra window.Terminal y
+       window.FitAddon. Monaco se carga perezoso desde vendor/monaco cuando
+       el editor se abre por primera vez (loader.js AMD). -->
+  <script src="vendor/xterm/xterm.js"></script>
+  <script src="vendor/xterm/addon-fit.js"></script>
+  <script src="bundle.js"></script>
+</body>
+</html>

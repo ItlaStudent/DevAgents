@@ -1,0 +1,5 @@
+#!/bin/sh
+# En un worktree `.git` es un archivo: los hooks viven en el directorio común.
+hooks_dir="$(git rev-parse --git-common-dir)/hooks"
+pwsh -NoProfile -ExecutionPolicy Bypass -File "$hooks_dir/pre-commit.ps1"
+exit $?

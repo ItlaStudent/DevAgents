@@ -1,0 +1,173 @@
+; Module-definition para devagents_core.dll — exporta la API C (c_api.zig)
+; a la tabla de exports del DLL para la cabina Win32 (C++).
+LIBRARY devagents_core
+EXPORTS
+da_models_selection_v1_json
+da_model_preferences_set_v1_json
+    da_build_identity_v1
+    da_browser_host_attach_v1
+    da_browser_host_poll_v1
+    da_browser_host_complete_v1
+    da_browser_control_v1
+    da_process_control_v1
+    da_core_init
+    da_core_shutdown
+    da_order_submit
+    da_order_submit_options_async
+    da_order_replan_async
+    da_order_plan_json
+    da_order_submit_async
+    da_order_from_issue_async
+    da_order_from_issue_images_async
+    da_issues_list_json
+    da_issue_read_json
+    da_issue_prompt_json
+    da_issue_comment_json
+    da_order_answer
+    da_order_answer_async
+    da_order_plan_poll
+    da_order_approve
+    da_order_confirm_json
+    da_order_cancel
+    da_plan_cancel
+    da_order_status
+    da_sessions_json
+    da_sessions_json_filtered
+    da_session_archive
+    da_session_archive_before_preview
+    da_session_archive_before
+    da_session_messages_json
+    da_session_messages_v2_json
+    da_session_rename
+    da_session_delete
+    da_plan_get_json
+    da_plan_set_model
+    da_plan_get_model
+    da_exec_set_model
+    da_exec_get_model
+    da_audit_set_model
+    da_audit_get_model
+    da_swarm_set_models_json
+    da_swarm_get_models_json
+    ; --- E5.08: agentes externos (registro/detección + límites gobernados) ---
+    da_external_agents_json
+    da_external_limits_json
+    da_external_limits_set
+    da_repo_search
+    da_embeddings_config_json
+    da_embeddings_config_set
+    da_models_list_json
+    da_worker_output_poll
+    da_order_events_json
+    da_memory_context_json
+    da_approval_pending_json
+    da_approval_resolve
+    da_last_error
+    da_string_free
+    da_core_version
+    da_provider_add
+    da_key_add
+    da_key_remove
+    da_keys_json
+    da_key_set_meta
+    da_model_register
+    da_model_prioritize
+    da_models_discover
+    da_mount_add
+    da_mount_remove
+    da_mounts_list_json
+    da_spaces_list_json
+    da_space_create
+    da_space_archive
+    da_spaces_prune
+    ; --- Ship Flow (PR real vía gh) ---
+    da_order_ship_json
+    da_pr_merge
+    da_prs_json
+    da_repo_clone
+    da_order_worktree_json
+    da_plugins_list_json
+    da_plugin_trust
+    da_plugin_untrust
+    da_plugins_dir
+    da_complete_text
+    da_catalog_reconcile_enabled
+    da_skills_discover_json
+    da_shell_run
+    da_health_detail_json
+    da_health_probe_all_json
+    da_providers_list_json
+    da_catalog_info_json
+    da_specialists_json
+    da_router_candidates_json
+    da_ledger_escalations_json
+    da_checklist_json
+    da_web_search
+    da_pricing_revalidate
+    da_model_scores_json
+    da_capture_screenshot
+    da_approval_result_json
+    da_mcp_file_written
+    da_mcp_file_written_v2
+    da_set_mcp_session
+    da_evolution_summary_json
+    ; --- Ejecución de planes (sin esto la cabina puede planificar pero nunca ejecutar) ---
+    da_order_dispatch_async
+    da_order_dispatch_poll
+    da_order_plan_set_json
+    ; CHECKPOINT-T2: reanudar una orden 'interrupted' desde el checkpoint por
+    ; tarea (no rehace las completadas; re-ejecuta enteras las que quedaron a
+    ; medias). Mismo contrato async que dispatch: poll + status + events.
+    da_order_resume_async
+    ; SEMANTIC-GATE-T3: observable declarado de la orden (aserciones JSON);
+    ; el 'done' exige que se cumpla — fail con la diferencia concreta.
+    da_order_set_expected
+    da_order_expected_json
+    da_set_agentic_max_iterations
+    ; --- Sesiones y artefactos ---
+    da_session_timeline_json
+    da_list_artifacts_json
+    da_set_workspace_root
+    ; --- Salud, inventario y consumo ---
+    da_health_summary_json
+    da_inventory_json
+    da_inventory_refresh
+    da_usage_summary_json
+    ; --- E1.16/E1.18: medidor del plan y presupuesto de pago ---
+    da_usage_week_json
+    da_budget_state_json
+    da_budget_set_authorized
+    ; --- Auditoría ---
+    da_audit_ledger_json
+    da_audit_checklist_json
+    ; --- Permisos y aprobaciones con alcance ---
+    da_set_permission_config
+    da_set_hooks_config
+    da_set_governance_mode
+    da_get_governance_mode
+    da_set_reasoning_effort
+    da_model_set_favorite
+    da_approval_resolve_scoped
+    ; --- Cliente MCP nativo (orquestación de modelos externos) ---
+    da_mcp_connect
+    da_mcp_disconnect
+    da_mcp_is_connected
+    da_mcp_tools_json
+    da_mcp_call_tool
+    da_run_detached
+    ; --- E5.18: Best-of-N (opcion de orden, candidatas y eleccion del ganador) ---
+    da_order_set_best_of_n
+    da_best_of_n_candidates_json
+    da_best_of_n_choose
+
+
+    ; --- E5.29/E5.30 outgoing + remote broker ---
+    da_webhook_list_json
+    da_webhook_add
+    da_webhook_delete
+    da_webhook_test
+    da_notifications_since_json
+    da_remote_request_json
+    ; --- order_progress.v1 ---
+    da_order_progress_get
+    da_order_progress_set

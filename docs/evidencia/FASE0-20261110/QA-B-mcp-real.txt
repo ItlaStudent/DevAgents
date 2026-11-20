@@ -1,0 +1,21 @@
+Extracto revisado / Reviewed excerpt
+
+git_status isError=False s=0.053
+   {"blocked":false,"block_reason":"","approval_id":null,"exit_code":0,"stdout":"## No commits yet on master\n?? hola.txt\n","stderr":"","stdout_truncated":false,"stdout_total_bytes":40,"stderr_truncated":false,"stderr_total_bytes":0}
+fs_read hola.txt (raiz = proyecto) isError=False
+   {"path":"hola.txt","offset":0,"total_bytes":6,"truncated":false,"content":"hola\r\n"}
+shell_run python script.py isError=False
+   {"blocked":true,"block_reason":"PermissionRequired: aprobacion humana desde la UI","approval_id":1,"exit_code":0,"stdout":"","stderr":"","stdout_truncated":false,"stdout_total_bytes":0,"stderr_truncated":false,"stderr_total_bytes":0}
+approval_result 1 isError=False
+   {"approval_id":1,"kind":"shell_command","status":"pending","executed":false}
+capture_screenshot isError=False
+   {"ok":false,"status":"pending","approval_id":2,"message":"captura de pantalla pendiente de aprobación humana en la cabina; no se tomó. Consulta approval_result con este approval_id."}
+approval_result 2 isError=False
+   {"approval_id":2,"kind":"screen_capture","status":"pending","executed":false}
+bmp nuevos tras capture_screenshot sin aprobar: 0
+cierre de stdin con aprobaciones pendientes: 0.221 s
+h11 rep=1 aprobaciones_pendientes=3 cierre_stdin_s=0.282
+h11 rep=2 aprobaciones_pendientes=3 cierre_stdin_s=0.28
+h11 rep=3 aprobaciones_pendientes=3 cierre_stdin_s=0.285
+h11 rep=4 aprobaciones_pendientes=3 cierre_stdin_s=0.286
+h11 rep=5 aprobaciones_pendientes=3 cierre_stdin_s=0.28

@@ -1,0 +1,23 @@
+Extracto revisado / Reviewed excerpt
+
+A9 · «entre todos construyen y auditan hasta darte un entregable»
+Veredicto: CIERTO EN PARTE.
+Falta: el mismo recorrido de A6, con un FAIL del auditor y su correccion, para sostener «hasta darte». Incluido en A6.
+A13 · «no nos interesa medir nada de nuestros usuarios»
+Veredicto: CIERTO HOY.
+Evidencia: core/src/telemetry.zig (52 lineas) no envia nada: opt_in_enabled = false por defecto (:9), submitFeedback solo formatea un JSON
+  (:30-34). Solo lo importa core/src/root.zig:209 y :337 (exportacion y pruebas); ningun otro modulo lo llama. No hay codigo de
+  actualizacion automatica ni de envio a un servidor de DevAgents (R2:92-93; busqueda de URL en core/src: todas las https:// fuera de pruebas
+  son de proveedores, forjas o del usuario).
+A14 · «DevAgents no tiene servidor propio, asi que tus sesiones, datos y claves se quedan en tu ordenador»
+Veredicto: CIERTO HOY.
+A15 · «Lo unico que sale es lo que tu le envias al modelo que elijas»
+Veredicto: CIERTO EN PARTE. Lo que sale de verdad:
+  1. El mensaje, la conversacion previa, la memoria del proyecto y los archivos que lea el agente, al proveedor o CLI elegido
+     (direct_mode.zig:993-1018 buildUserPrompt). En Orquestado y Colmena salen tambien a los demas modelos que elige el router o el enjambre
+     (planificador, ejecutores, auditor de otro fabricante): no es «el modelo que elijas», son varios.
+A16 · «Multiagente. Usa agentes individuales o en paralelo»
+Veredicto: CIERTO HOY.
+Lo que no se hizo o no se verifico en este contraste:
+- No se abrio DevAgents ni se lanzo ninguna orden: los veredictos «CIERTO HOY» se apoyan en la evidencia guardada que se cita, no en un uso nuevo.
+- No se comprobo comando a comando que llamadas de red hacen las CLI externas al detectarlas, ni lo que envia el runtime WebView2.

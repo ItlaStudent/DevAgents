@@ -1,0 +1,12 @@
+# Raw command output preserves trailing whitespace; source checks stay enabled.
+
+# Fuentes siempre con LF en el arbol de trabajo: con core.autocrlf=true git los sacaba con CRLF y
+# `zig fmt --check` (gancho de commit) los rechazaba tras cada fusion o checkout (11-nov-2026).
+*.zig text eol=lf
+*.c text eol=lf
+*.h text eol=lf
+*.cpp text eol=lf
+*.hpp text eol=lf
+*.ts text eol=lf
+# T9 fase B: lo de tools/linux se ejecuta dentro del contenedor Linux (sh no acepta CRLF).
+tools/linux/* text eol=lf

@@ -1,0 +1,9 @@
+[
+  {"id":"atlas","name":"Atlas","role":"Orchestrator","model":"opencode/minimax-m2.5-free","room":"dispatch","capabilities":["planning","coordination","routing"],"status":"active"},
+  {"id":"mika","name":"Mika","role":"Research","model":"opencode/nemotron-3-super-free","room":"war-room","capabilities":["research","analysis","investigation"],"status":"active"},
+  {"id":"vera","name":"Vera","role":"Visual","model":"opencode/big-pickle","room":"skill-lab","capabilities":["design","visual","creative"],"status":"active"},
+  {"id":"rook","name":"Rook","role":"Runner","model":"opencode/minimax-m2.5-free","room":"ops-desk","capabilities":["execution","deployment","automation"],"status":"active"},
+  {"id":"echo","name":"Echo","role":"Archivist","model":"opencode/hy3-preview-free","room":"quiet-bay","capabilities":["memory","documentation","archiving"],"status":"active"},
+  {"id":"iris","name":"Iris","role":"Narrative","model":"opencode/minimax-m2.5-free","room":"quiet-bay","capabilities":["writing","storytelling","narrative"],"status":"active"},
+  {"id":"forge","name":"Forge","role":"Sandbox","model":"opencode/minimax-m2.5-free","room":"ops-desk","capabilities":["sandbox","testing","building"],"status":"active"}
+]

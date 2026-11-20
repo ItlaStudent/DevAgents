@@ -1,0 +1,14 @@
+{
+  "mcpServers": {
+    "engram": {
+      "command": "engram",
+      "args": ["mcp"],
+      "description": "Engram memory server for project context"
+    },
+    "filesystem": {
+      "command": "fs-mcp",
+      "args": ["--root", "."],
+      "description": "Filesystem access"
+    }
+  }
+}

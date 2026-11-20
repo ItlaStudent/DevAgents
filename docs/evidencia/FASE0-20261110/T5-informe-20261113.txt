@@ -1,0 +1,11 @@
+Extracto revisado / Reviewed excerpt
+
+  Revisión del diff: mutex del host, pregunta al motor antes de pararlo, lanzamiento del instalador con CreateProcessW y
+  ruta entre comillas, User-Agent fijo, descargas por getPublicFollowStatus filtradas con publicHost, espera al mutex en
+  installer.iss. Sin objeciones.
+  - runtime-binaries ReleaseSafe 23/23 y tools/package_installer.ps1: PASS; escribe DevAgents-Setup-v0.1.0.exe.sha256
+    con el formato «<64 hex>  <nombre>» y la huella coincide con Get-FileHash del .exe ya firmado.
+  - Espera al mutex: con el mutex DevAgentsHostRunning retenido, el instalador con /UPDATE espera 61 s, sale con código 1
+    y registra «DevAgents sigue abierto tras 60 s: no se actualiza; queda para el proximo cierre.» Sin el mutex, instala
+  Sigue SIN verificar: el cierre real del host lanzando el instalador (no hay versión publicada mayor que 0.1.0; el
+  repositorio es privado) y GitHub real.

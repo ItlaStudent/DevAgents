@@ -1,0 +1,11 @@
+Extracto revisado / Reviewed excerpt
+
+Este informe documenta lecturas de código y evidencia existente. NO es salida
+cruda de una ejecución del producto ni una auditoría independiente.
+- Privacidad identifica varios modelos, fabricantes de CLI, servicios y web;
+  DuckDuckGo sin clave se contrastó directamente con el código actual.
+- Instalación corrige la compilación en cada arranque y aceptación de diálogos
+  tras 20 s; incluye /nodeps y nombres reales de binarios.
+No se hizo verificación funcional nueva y no se atribuye a esta sesión ningún
+privacidad es revisión estática con los límites indicados, no captura de red.
+Las filas, comandos, cifras y límites de los dos idiomas son equivalentes.

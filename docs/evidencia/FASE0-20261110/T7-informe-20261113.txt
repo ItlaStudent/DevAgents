@@ -1,0 +1,5 @@
+Extracto revisado / Reviewed excerpt
+
+  test-core completo 2186/2186 (FINAL-test-core.txt); test-mcp 84/84 (FINAL-test-mcp.txt); test-bridge OK 6/6 pasos
+  (FINAL-test-bridge.txt); zig fmt --check rc=0 (F-zig-fmt-check.txt); clang-format sin avisos en los C++ tocados;
+  typecheck WebUI rc=0; node --test bridge_inventory+security 20/20. La suite completa (zig build test) NO se corrió.

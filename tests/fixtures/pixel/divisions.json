@@ -1,0 +1,15 @@
+[
+  {"id":"engineering","name":"Engineering","emoji":"⚙️","description":"Software engineering and development","agentCount":27,"roomId":"war-room"},
+  {"id":"design","name":"Design","emoji":"🎨","description":"UI/UX and graphic design","agentCount":8,"roomId":"skill-lab"},
+  {"id":"marketing","name":"Marketing","emoji":"📣","description":"Marketing and communications","agentCount":30,"roomId":"hallway"},
+  {"id":"sales","name":"Sales","emoji":"💼","description":"Sales and business development","agentCount":9,"roomId":"quiet-bay"},
+  {"id":"product","name":"Product","emoji":"📦","description":"Product management","agentCount":5,"roomId":"war-room"},
+  {"id":"management","name":"Project Management","emoji":"📋","description":"Project management and coordination","agentCount":6,"roomId":"war-room"},
+  {"id":"testing","name":"Testing","emoji":"🧪","description":"QA and testing","agentCount":8,"roomId":"ops-desk"},
+  {"id":"support","name":"Support","emoji":"🛟","description":"Customer support","agentCount":6,"roomId":"dispatch"},
+  {"id":"spatial","name":"Spatial Computing","emoji":"🌐","description":"Spatial computing and VR/AR","agentCount":6,"roomId":"skill-lab"},
+  {"id":"specialized","name":"Specialized","emoji":"🔬","description":"Specialized domains","agentCount":30,"roomId":"hallway"},
+  {"id":"academic","name":"Academic","emoji":"📚","description":"Academic research","agentCount":5,"roomId":"quiet-bay"},
+  {"id":"finance","name":"Finance","emoji":"💰","description":"Financial analysis","agentCount":4,"roomId":"war-room"},
+  {"id":"gamedev","name":"Game Development","emoji":"🎮","description":"Game design and development","agentCount":6,"roomId":"skill-lab"}
+]

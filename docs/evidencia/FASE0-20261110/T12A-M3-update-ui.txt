@@ -1,0 +1,13 @@
+Extracto revisado / Reviewed excerpt
+
+compiled update entry to dist/update_ui.test.js
+exit=1
+AssertionError [ERR_ASSERTION]: sin firma verificable, descargar no acepta instalar
++ actual - expected
+  actual: 'apply:true',
+  expected: 'download',
+
+=== CON el cambio ===
+compiled update entry to dist/update_ui.test.js
+PASS T5 update UI: interruptor, Buscar ahora y fecha; aviso «disponible» con notas (shell.open) y Descargar; «Lista…» con firma y No instalar; sin publicaciones, errores y fallo del puente visibles; título con <img onerror> pintado como texto
+exit=0

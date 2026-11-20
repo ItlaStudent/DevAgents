@@ -1,0 +1,4 @@
+Extracto revisado / Reviewed excerpt
+
+c8d7f90b7b997fb51203fdeb1aaca69b8d855a87153b9a3118bdb40216bfd36a  devagents-0.1.0-linux-x86_64.tar.gz
+DOCKER_EXIT=0

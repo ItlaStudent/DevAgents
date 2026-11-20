@@ -1,0 +1,6 @@
+{
+  "name": "lint-plugin",
+  "version": "1.0.0",
+  "capabilities": ["linting", "formatting"],
+  "description": "Linting and formatting plugin for multiple languages"
+}

@@ -1,0 +1,53 @@
+Extracto revisado / Reviewed excerpt
+
+EVENTOS NUEVOS (core/src/superagent.zig salvo indicacion)
+- swarm_group_v1 {wave, members[<=32 ids, <=64 B], size, parallel}
+  Emite: Superagent.recordSwarmGroup, llamado en approveAndDispatch justo antes de dispatchWaveTasks
+  por cada ola real con mas de una tarea. parallel=false solo si toda la ola es local y serializada.
+  Prueba: "T8 swarm_group_v1 nace de la ola real y task_audit distingue al segundo auditor" (ola 2 = t2+t3)
+          "T8 swarm_group_v1: un plan en cadena no inventa colmena" (0 eventos).
+- task_audit + auditor_index (0 puerta determinista, 1 primer auditor, 2 segundo) y role
+  ("deterministic_gate" | "audit" | "second_audit"). Campos ADITIVOS en el payload existente: los lectores
+  actuales (chat_activity.ts, chat_panel.ts, ui_diag.ts, best_of_n.zig, order_graph.ts, tools/cdp_*) leen
+  task_id/verdict/model/provider y no se rompen; un evento aparte duplicaria veredictos.
+  AuditEntry.auditor_index (u8, por defecto 0); promoteFailedAuditEvidence lo calcula con auditorIndexOf
+  (mismo criterio que assignModel para el rol second_audit: auditar en posicion impar). La deduplicacion
+  del asiento AUDIT incluye ahora el indice: dos auditores con el mismo modelo son dos votos.
+  Prueba: la misma de arriba (un veredicto con indice 1 y otro con indice 2 sobre t1).
+- memory_lessons_v1 {count, titles[<=5, <=80 B UTF-8], source "lista"|"texto"}
+  Emite: processOrder, armado al llamar MemoryBackend.loadLessons y escrito (recordOrderEvent) en cuanto
+  existe la fila de la orden. Sin backend que devuelva lecciones, no hay evento.
+  Prueba: "T8 memory_lessons_v1: recuento y titulos acotados de las lecciones consultadas" (+ NoopMemory = 0).
+- memory_lesson_saved_v1 {title <=80 B}
+  Emite: cierre de orden fallida, solo si MemoryBackend.saveLesson devuelve true. saveLesson pasa de void a
+  bool (NoopMemory false; LocalMemory true si el INSERT da SQLITE_DONE; Engram true si mem_save no da error).
+  Prueba: "T8 memory_lesson_saved_v1 solo cuando la leccion se guardo de verdad" (true -> 1 evento; false -> 0).
+  Arreglo destapado por esta prueba: el prompt y el proyecto de la leccion se leian de una sentencia SQLite ya
+  finalizada (memoria liberada); ahora se copian antes de finalizar.
+- replan_v1 {reason, from_plan_id, to_plan_id, same_row, tasks, changes <=512 B UTF-8}
+  Emite: (a) replanFollowUp (bucle agentico, reason agent_follow_up) tras insertPlan;
+         (b) processOrder cuando Superagent.replan_changes viene puesto, tras insertPlan (reason user_changes).
+         c_api.zig: da_order_replan_async copia los cambios en AnswerContext.replan_changes y
+  Pruebas: "T8 replan_v1: el bucle agentico anuncia el plan nuevo sobre la misma orden",
+           "T8 replan_v1: changes se acota a 512 bytes sin partir un caracter",
+           c_api "T8 replan_v1: pedir cambios al plan anuncia el plan nuevo sobre la misma fila".
+- sidekick_task_v1 {task_id, kind, provider, model}
+  Emite: runTaskInWave, junto a task_started, para tareas investigar/resumir/documentar cuyo modelo asignado es
+  el del pin sidekick del compositor (collectSidekickTasks en approveAndDispatch).
+  Prueba: "T8 sidekick_task_v1: solo la tarea que corre con el modelo del rol sidekick" (t1 si, t2 no; sin pin, 0).
+Corrida filtrada (test-core -Dtest-filter=T8): 9/9.
+
+CABINA (shell/webui/src/panes/order_graph.ts)
+- Memoria (Contexto): recuento de lecciones consultadas y guardadas, titulos en el detalle; sin evento, omitida.
+- Colmena: grupos = miembros de swarm_group_v1 (o del reparto de delegation_started_v1). Se quita la heuristica
+  de 5 s. Orden en modo Colmena sin olas registradas: «COLMENA · OMITIDA» con el motivo en <title>.
+- Sidekick: rol SIDEKICK solo con sidekick_task_v1 (investigar/documentar/resumir ya no lo son por tipo).
+- Auditoria: siempre dos nodos; el segundo con auditor_index 2 y aristas desde las tareas que reviso;
+  sin esos veredictos, «Segunda auditoria» omitida.
+- Plan: lazo del Plan a si mismo con «REPLAN ×N» y motivo + cambios en el detalle.
+- Encender a peticion del agente: ui_action open_view {view:"order_graph"} (accion ya permitida por el motor);
+  ui_actions.ts -> deps.showOrderGraph -> main.ts muestra la vista agent y MissionControlPanel.showOrderGraph
+  enciende el grafo. Solo vista; sin manejador se rechaza. No hay manejador nuevo del puente.
+Pruebas: shell/webui/tests/browser_bar.test.cjs ("PASS T8 grafo: ...") y tests/ui_actions_test.cjs (4 nuevas).
+Ambas fallan con order_graph.ts / ui_actions.ts de 9bd272af (comprobado: «Memoria con lecciones consultadas»
+actual 'skip'; ui_actions 3 comprobaciones FALLARON).

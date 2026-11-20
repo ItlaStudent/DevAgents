@@ -1,0 +1,1 @@
+{"type":"event_msg","payload":{"rate_limits":{"secondary":{"used_percent":42,"resets_at":1800600000,"window_minutes":10080},"primary":{"used_percent":79,"resets_at":1800005000,"window_minutes":300},"daily":{"used_percent":25,"resets_at":1800050000,"window_minutes":1440}}}}

@@ -1,0 +1,10 @@
+{
+  "webhooks": [
+    {
+      "name": "ci-trigger",
+      "url": "https://hooks.example.com/ci",
+      "events": ["push", "pr"],
+      "description": "Triggers CI pipeline on code changes"
+    }
+  ]
+}

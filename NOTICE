@@ -1,0 +1,61 @@
+DevAgents
+Copyright 2026 Jesús Rafael Calderón Mejía (Ad Astra)
+
+Este producto se distribuye bajo la Licencia Apache, versión 2.0 (archivo LICENSE).
+
+«DevAgents» y «Ad Astra» son nombres reservados por su titular; su uso se rige por
+TRADEMARKS.md y no queda concedido por la licencia (Apache-2.0, sección 6).
+
+-------------------------------------------------------------------------------
+Componentes de terceros
+-------------------------------------------------------------------------------
+
+El código fuente de DevAgents incluye, o sus binarios incorporan, los componentes
+siguientes. Cada uno conserva su propia licencia; el texto completo está en la ruta
+indicada del repositorio de código. Ninguno de ellos queda relicenciado bajo Apache-2.0.
+
+SQLite 3.45.0
+  core/src/db/sqlite3.c, core/src/db/sqlite3.h
+  Dominio público («The author disclaims copyright to this source code»).
+
+Monaco Editor (monaco-editor 0.56.0)
+  shell/webui/vendor/monaco/
+  Licencia MIT. Copyright (c) 2016 - present Microsoft Corporation.
+  Texto: shell/webui/vendor/monaco-LICENSE.txt
+
+xterm.js (@xterm/xterm 6.0.0)
+  shell/webui/vendor/xterm/xterm.js, xterm.css
+  Licencia MIT. Copyright (c) 2017-2019, The xterm.js authors;
+  Copyright (c) 2014-2016, SourceLair Private Company;
+  Copyright (c) 2012-2013, Christopher Jeffrey.
+  Texto: shell/webui/vendor/xterm-LICENSE.txt
+
+xterm.js addon-fit (@xterm/addon-fit 0.11.0)
+  shell/webui/vendor/xterm/addon-fit.js
+  Licencia MIT. Copyright (c) 2019, The xterm.js authors.
+  Texto: shell/webui/vendor/xterm-addon-fit-LICENSE.txt
+
+Microsoft WebView2 SDK 1.0.2903.40 (cabeceras y WebView2Loader)
+  shell/host/sdk/
+  Licencia BSD de 3 cláusulas. Copyright (C) Microsoft Corporation. All rights reserved.
+  Incorpora, según su propio aviso, Antlr3.Runtime 3.5.2-rc1 y StringTemplate4 4.0.9-rc1
+  (BSD de 3 cláusulas, The ANTLR Project).
+  Textos: shell/host/sdk/LICENSE.txt y shell/host/sdk/NOTICE.txt
+
+Biblioteca estándar de Zig 0.16.0 (enlazada en los binarios al compilar)
+  Licencia MIT (Expat). Copyright (c) Zig contributors.
+
+-------------------------------------------------------------------------------
+Software que se distribuye junto a DevAgents sin formar parte de él
+-------------------------------------------------------------------------------
+
+Microsoft Edge WebView2 Runtime, Evergreen Bootstrapper 1.3.269.9
+  tools/vendor/MicrosoftEdgeWebview2Setup.exe
+  Software propietario de Microsoft Corporation, redistribuido sin modificar y con su
+  firma original, como permite la documentación de distribución de WebView2. No está
+  cubierto por la licencia Apache-2.0 de DevAgents. El Runtime que instala se rige por
+  los términos de Microsoft.
+
+-------------------------------------------------------------------------------
+Inventario detallado (rutas, versiones y obligaciones): disponible en el repositorio
+de código, docs/evidencia/FASE-X/PUB-001/inventario-licencias-20261110.txt.

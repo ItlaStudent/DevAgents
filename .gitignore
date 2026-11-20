@@ -1,0 +1,137 @@
+zig-cache/
+.zig-cache/
+zig-out/
+# Prefijos aislados de los constructores (`--prefix zig-out-<paso>-<fecha>`) mientras
+# la cabina del propietario tiene bloqueado zig-out/bin.
+/zig-out-*/
+node_modules/
+# Zig que DevAgents.bat instala solo cuando el tester no lo tiene. Son ~350 MB
+# de compilador; se descarga, no se versiona.
+toolchain/
+*.db
+*.db-wal
+*.db-shm
+/dist/
+*.pdb
+
+# Artefactos de compilacion en la RAIZ del repositorio.
+# Todo lo que produce `zig build` vive en zig-out/. Estas reglas evitan que
+# vuelvan a acumularse copias sueltas junto a build.zig (llegaron a ser 58
+# archivos y 2,4 GB de cache obsoleta).
+/*.exe
+/*.obj
+/*.dll
+/*.lib
+/*.ilk
+/vc140.pdb
+/out_bridge.txt
+
+# Salida del bundler de la WebUI: se regenera con `zig build webui`.
+/shell/webui/dist/
+
+# Bases de datos sueltas en la raiz. Las de verdad viven en
+# %LOCALAPPDATA%\DevAgents (ver core/src/paths.zig y shell/host/core_client.cpp);
+# cualquier .db que aparezca aqui es residuo de una ejecucion con la ruta mal
+# resuelta y no debe volver a colarse en el repositorio.
+/*.db
+/*.db-wal
+/*.db-shm
+
+# Salida del agente. `core/src/spaces.zig` crea un git worktree por orden en
+# `orden-<N>/`; es producto de una ejecucion, no fuente. Sin esta regla un
+# `git add -A` mete el trabajo del agente en el repositorio del propio
+# proyecto (paso con orden-17/ y orden-69/).
+/orden-*/
+
+# Worktrees de Spaces. `spaces.zig` los crea bajo `.beats/spaces/<nombre>` y
+# cada uno es un REPOSITORIO GIT anidado. Sin esta regla, un `git add -A` los
+# mete como submodulo accidental (paso con `.beats/spaces/aaa`): el commit
+# guarda un puntero a un sha que ningun clon puede resolver.
+/.beats/
+
+# Arneses compilados que viven junto a los scripts de tools/. El binario se
+# regenera; solo el script entra al repositorio.
+tools/*.exe
+tools/*.pdb
+tools/*.obj
+# EXCEPCION: el bootstrapper oficial de WebView2 (firmado por Microsoft) va al
+# repositorio porque el instalador lo empaqueta para instalar el runtime cuando
+# falta — sin el, la dependencia quedaba sin satisfacer.
+!tools/vendor/
+
+# Capturas de `da_capture_screenshot`. Son BMP de 24 bits sin comprimir: una
+# sola pantalla 1920x1080 ocupa ~6 MB, y el arnes del puente genera una por
+# ejecucion.
+/.screenshots/
+
+# Arneses de auditoria. Cada pasada de revision (propia o de un modelo
+# externo) deja scripts y volcados JSON en la raiz; son de usar y tirar, pero
+# ensuciaban `git status` hasta esconder los cambios de verdad. La evidencia
+# que SI se conserva vive en la documentación interna, no aqui.
+/scratch_*
+
+# Trabajo personal que quedo en la raiz y NO es de este proyecto (generacion de
+# CV, una worksheet resuelta). Se ignora en vez de borrarse: es del usuario y no
+# le corresponde al repositorio decidir por el. Pero tampoco puede subir a un
+# repositorio compartido con el equipo.
+/generate_cv.py
+/generate_docx.py
+/annotate_pdf.py
+/create_perfect_pdf.py
+/inspect_blocks.py
+/find_coords.py
+/find_section_e.py
+/find_words.py
+/pdf_text.txt
+/i-wish-if-only-worksheet_RESUELTO.*
+/create_lab_report.py
+/organize_assignments.py
+/Demostracion_SOS_Arduino.mp4
+/diag_3_meta_table.docx
+/generate_handheld_mobile_video.py
+/generate_perfect_docx.py
+/generate_sos_video.py
+/render_realistic_circuit.py
+
+# Cache de Python. Generica y siempre desechable.
+__pycache__/
+*.pyc
+
+# Trabajo de clase que aterriza en la RAIZ del repo. Ya iba por la tercera vez
+# (los .py y el .mp4 de arriba son de la misma procedencia) y el repo esta
+# compartido con el equipo. Regla generica en vez de una linea por archivo:
+# en la raiz de este proyecto no vive ningun medio ni documento ofimatico.
+# Las capturas de evidencia van en la documentación interna, que NO le afecta.
+/*.jpg
+/*.jpeg
+/*.png
+/*.gif
+/*.bmp
+/*.mp4
+/*.mov
+/*.docx
+/*.pptx
+/*.xlsx
+
+# Trabajo personal que convive en la carpeta (no va al repositorio)
+catalogo-convocatorias-software.html
+catalogo-convocatorias-software.html.bak
+plan-de-asalto-convocatorias.html
+
+# Artefactos de verificación CDP (scripts scratch y capturas de MCP)
+tools/_*.json
+tools/Output/
+cdp_result.json
+.playwright-mcp/
+
+# Cachés y prefijos con sufijo de los coordinadores y constructores (.zig-cache-orq, -sol, -r2, -cli…).
+/.zig-cache-*/
+
+/zig-out-*.log
+
+# SEC5 (e5-sec-os): copias privadas de runtimes y fixtures retenidas; nunca al repositorio.
+/.sec5-r2-runtimes-20261013/
+/.sec5-r3-*/
+/zig-out-r3*/
+/zig-out-seg018*/
+/.sec5-fixture-*/

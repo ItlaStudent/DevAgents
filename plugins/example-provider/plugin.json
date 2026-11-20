@@ -1,0 +1,9 @@
+{
+  "name": "example-provider",
+  "version": "1.0.0",
+  "abi_version": 1,
+  "dll": "example_provider.dll",
+  "capabilities": [
+    {"kind": "provider", "name": "ExampleProv", "description": "Example LLM provider with mock base_url"}
+  ]
+}

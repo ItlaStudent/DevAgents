@@ -1,0 +1,3 @@
+Extracto revisado / Reviewed excerpt
+
+Build Summary: 151/151 steps succeeded; 2512/2518 tests passed (6 skipped)

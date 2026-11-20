@@ -1,0 +1,6 @@
+Extracto revisado / Reviewed excerpt
+
+  Paquete ReleaseSafe (tools/Output/DevAgents-Setup-v0.1.0.exe, 11,83 MB; .zip 19,5 MB; firmas autofirmadas 7/7):
+  (T4-humo-paquete-20261113-023335.txt): arranque en frío 545 ms, ventana «DevAgents», proceso vivo, doctor listo.
+  - Recorrido en vivo del doctor DENTRO de la cabina con la ventana a la vista: cubierto por la prueba de navegador
+    (prv003_browser.cjs, «PASS T4 doctor») y por el humo del paquete (mismo motor); no se ha mirado a ojo.

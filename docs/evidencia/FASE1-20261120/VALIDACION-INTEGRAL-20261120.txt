@@ -1,0 +1,140 @@
+VALIDACIÓN INTEGRAL PRE-F2 · 20-nov-2026 (reloj del equipo) · Devin (SWE-2)
+Datos: DEVAGENTS_DATA_DIR=C:/tmp/angel-audit-data (copia de angel-dv-b3-data). Nunca datos del dueño.
+Host Debug: /c/tmp/dv-fase1-prefix reconstruido a HEAD (768cb6a4), CDP :9333, WebUI lang=en.
+
+=====================================================================
+1. CLI (devagents.exe / devagents-core.exe) — recorrido real
+=====================================================================
+- --version, help, doctor, models list/discover/roster, chat, order, route --demo,
+  agents/specialists, mount list, webhook list, health, health probe, debug --status,
+  governance (get/set), usage, selftest --caso prosa, design --help: TODOS responden.
+- doctor: detecta Claude Code 2.1.322 SIN SESIÓN (aviso correcto), Codex 0.170.0 con
+  sesión de suscripción OK, Gemini CLI con método api_key (aviso de facturación),
+  OpenCode 1.19.4 con clave API (aviso) + modelos gratis sin sesión, 3 claves DPAPI,
+  Ollama responde, "6 rutas utilizables".
+- chat --provider OpenRouter --model google/gemma-4-31b-it:free → "CLI-OK" (llamada real).
+- chat por --stdin con Cohere → OK. Errores de modelo inexistente: mensaje claro en
+  español con 5 alternativas del catálogo. Correcto.
+- order "Create saludo.txt..." --yes → orden #65, plan→Cohere command-a-plus-05-2026,
+  archivo escrito en devagents-workspace/orden-65/saludo.txt con contenido EXACTO.
+  Auto-auditoría 1 pasada. VERIFICADO EN DISCO.
+- selftest --caso prosa → orden #68, 867 bytes, PASA (verificada en disco).
+- DOS órdenes en paralelo (test2/test3) → #66 alpha.txt=ALPHA, #67 beta.txt=BETA,
+  workspaces separados, ambas DONE. Paralelismo real confirmado.
+- HALLAZGO i18n: el 100 % de la salida CLI es español, sin modo inglés. doctor,
+  order, health, errors — todo ES. El CLI no tiene i18n (la WebUI sí desde F1.11).
+- HALLAZGO menor: `devagents doctor` imprime líneas "debug:" de detección de CLI
+  en la salida normal (ruido).
+
+=====================================================================
+2. MCP (devagents-mcp.exe stdio, protocolo 2024-11-05)
+=====================================================================
+- initialize + tools/list OK; serverInfo devagents-mcp 0.1.0+e770b865.
+- 121 herramientas (el doc del 12-nov decía 114): incluye fs_list/fs_read/fs_search/
+  fs_write, git_status/diff/log/add/commit, spaces_list, plan_approve/plan_replan,
+  session_archive, ship_order, pr_merge — la paridad MCP es MUCHO mayor que la
+  ficha CK-MCP-005 del 12-nov (habría que re-medirla).
+- Token en params.token de initialize funciona; swarm_set_models (privilegiada)
+  fijó 4 miembros y swarm_get_models los devolvió.
+- HALLAZGO i18n: descriptions de las 121 tools en español (audiencias: IDEs en
+  inglés las leerán en español; impacto bajo pero real).
+
+=====================================================================
+3. Orden Colmena EN VIVO por la cabina (WebUI, lang=en, CDP)
+=====================================================================
+- swarm_set_models (MCP): OpenRouter gemma-4-31b-it:free, Cohere command-a-plus-05-2026,
+  OpenRouter nemotron-3-nano-omni-30b-a3b-reasoning:free, Cohere command-a-reasoning-08-2025
+  → 2 fabricantes, todo gratis, 0 modelos locales (como pidió el dueño).
+- Orden #69 por la cabina en modo Colmena: "tres archivos manzana/pera/uva".
+- Resultado: DONE. Las 3 tareas cayeron en olas, el router probó OpenRouter
+  ernie-5.5-flash-preview:free → FALLÓ → siguió Cohere command-a-plus (resiliencia
+  real observada: "falló OpenRouter · ernie… — siguió Cohere · command-a-plus").
+  Reintentos por límite de peticiones visibles y recuperados.
+- Gate semántico PASS (6 comprobaciones del observable declarado).
+- HALLAZGO de orquestación: el plan salió como 3 olas de 1 tarea ("depende de t1/t2"):
+  el planificador serializó tareas de archivos independientes en el mismo directorio.
+  Colmena no paralelizó de verdad en esta orden (¿conservador del planner o diseño
+  anti-colisión? documentado, no corregido).
+- i18n: la vista de detalle de orden tenía ~60 cadenas españolas sin traducir
+  (estados de ola, aprobación, reintentos, gates, worktree). Corregido en en.ts:
+  +3 tandas (F1.11b/c) → 856 frases, 151 patrones; i18n.test PASS; cosecha en vivo
+  de la orden #69 → solo quedan los títulos de tarea generados por el planificador
+  (contenido del modelo, correcto no traducir).
+
+=====================================================================
+4. Promesas del anuncio (CK-PUB-017 / R3-anuncio-contra-codigo)
+=====================================================================
+Re-verificación de los bloqueantes del 12-nov contra el estado de hoy:
+- A3/A30 (público Apache-2.0): sigue FALSO hasta el push del dueño; LICENSE=Apache-2.0
+  confirmado, historial ya reescrito sin claves, export público saneado existe.
+- A25 (4stra.dev/devagents): el dueño la publicó el 12-nov (CK-PUB-005) → probablemente
+  CIERTO ya; falta re-verificar HTTP y que enlace al repo.
+- A28 (Windows y Linux): la suite corre en Docker Linux pero la cabina es Win32+
+  WebView2 → el anuncio debe decir "Windows; Linux en camino". Sigue bloqueando
+  la frase literal.
+- A6 (colmena): AHORA SÍ hay recorrido en vivo con 2 fabricantes y entrega en disco
+  (orden #69 arriba). Falta: un FAIL del auditor con corrección y roles fijados.
+- A7 (modelos en local): sin prueba en vivo (Ollama responde pero no se ordenó;
+  el dueño prefiere no usar locales). La frase "modelos en local" sigue sin evidencia.
+- A10 (MCP desde IDE externa): MCP responde y tiene 121 tools, pero no hubo
+  recorrido desde una IDE real en esta sesión.
+- A17 (subagentes propios): delegación de 1 nivel por diseño; sin cambios.
+- A19/A20 (reglas en Directo / reglas propias en cabina): F1.7 pendiente.
+- A5 (cifra 80 000 / acusación): redacción pendiente del dueño, sin cambios.
+- Resto (A1,A2,A4,A8,A9,A11-A16,A21-A24,A26,A27,A29,A31,A32): igual que R3.
+
+=====================================================================
+5. Trazas de competidores (changelogs 12-20 nov) → pruebas derivadas
+=====================================================================
+- OpenCode v2.3.x: subagentes en background que reportan "sigue corriendo" (no
+  cerrar con informe parcial); timeout de shell → background en vez de matar;
+  renombre solo-mayúsculas en FS insensible (Windows); rechazo de permiso que
+  cancela solo las peticiones del mismo paso; "body too large" → compactar+reintentar.
+  → DevAgents: command_policy ya exige aprobación humana para no-readonly;
+  renombre mayúsculas y timeout→background quedan como candidatos de prueba F1.x.
+- Raven 0.2.8: sandbox por ejecutor, DAG con replanificación que conserva trabajo
+  pendiente, búsqueda de sesiones Cmd+K, cache de prompt.
+- Ruflo 3.77-3.78: token MCP en tiempo constante (ya portado en T3), guardia
+  pre-bash contra $(...) y ${X:-/} (command_policy cubierto por aprobación humana;
+  tests SEC2/CK-SEG-012 ya existen), frescura/replay en federación.
+- T3 Code v0.1.11: issues multi-forja (DevAgents ya tiene panel Issues), app en
+  10 idiomas (ellos 10, nosotros 2), túneles de puerto del agente (remote serve
+  solo loopback — brecha conocida).
+- Devin Desktop v3.14: Devin Bots con objetivo propio, sesiones que sobreviven
+  al cierre de la app (DevAgents: órdenes las sirve el motor, verificar si la
+  orden sigue si se cierra la cabina — pendiente de prueba).
+- Claude Code 2.1.329: Code Mode, /loop tareas programadas (F1.6 pendiente),
+  diálogo de confianza para hooks.
+- Orca 1.4.265: Orca Bots con triggers Slack/Gmail, chat con Cursor/Antigravity,
+  limpieza de workspaces.
+
+=====================================================================
+6. Estado i18n final
+=====================================================================
+- WebUI: 856 frases exactas + 151 patrones anclados; test PASS; cosecha en vivo
+  EN con órdenes reales → solo contenido generado por el planificador queda en
+  español (correcto: es salida del modelo, no chrome de UI).
+- CLI: 0 % inglés (toda la salida en español). MCP: descriptions en español.
+  Pendiente decisión: ¿CLI bilingüe? Es la mayor brecha i18n restante.
+
+=====================================================================
+7. CORRECCIONES DEL DUEÑO (20-nov, tarde)
+=====================================================================
+- A7 «modelos en local»: CORREGIDO — ya existe orden real con Ollama (orden #61
+  del cierre B5: plan en 147 s tras el arreglo de timeout de live_worker.zig y
+  archivo escrito). La frase del anuncio tiene respaldo.
+- A28 «Windows y Linux»: CORREGIDO en parte — el motor, la CLI y el MCP corren y
+  se probaron en Linux (Docker, suite 151/151 también en el exportado). Solo la
+  cabina gráfica es Win32+WebView2; «Funciona en Windows y Linux» es defendible
+  matizando que la GUI es Windows (o cuando F2.1 la sirva en navegador local).
+- Subagentes: aclarado — fan-out paralelo SÍ existe (delegate_tasks hasta 4
+  hijas por llamada, olas en Orquestado/Colmena, orden #69); anidación NO
+  (profundidad 1 por diseño de presupuesto/auditoría). Candidata F1.x:
+  delegación anidada con tope de profundidad y presupuesto (media-grande).
+- Texto del anuncio editado por el dueño (20-nov): eliminado el párrafo de
+  OpenAI/80 000 agentes, «madre/padre/abuelo» → «otro familiar», «Lo que viene»
+  → «Lo que todavía está en desarrollo». Riesgos residuales del texto final:
+  «multi-orquestador» (sigue siendo un orquestador con varias formas), «desde
+  finales del 2025» (no verificable en el repo), «5 o 10 usos» (el código usa
+  3 muestras), «tus propias reglas de programación» (F1.7 pendiente), «subagen-
+  tes» (fan-out sí, anidación no), enlaces que exigen repo público y página viva.

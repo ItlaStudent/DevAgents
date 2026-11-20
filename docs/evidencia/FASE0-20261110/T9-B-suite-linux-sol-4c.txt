@@ -1,0 +1,8 @@
+Extracto revisado / Reviewed excerpt
+
+PRETTY_NAME="Ubuntu 24.04.5 LTS"
+Linux 6.6.87.2-microsoft-standard-WSL2 x86_64
+0.16.0
+git version 2.43.0
+Python 3.12.3
+Build Summary: 24/24 steps succeeded; 2276/2492 tests passed (216 skipped)

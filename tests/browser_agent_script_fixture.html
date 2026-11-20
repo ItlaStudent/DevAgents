@@ -1,0 +1,52 @@
+<!doctype html>
+<html lang="es">
+<head>
+<meta charset="utf-8">
+<title>Banco del agente</title>
+<style>
+  body { margin: 0; font: 16px Arial, sans-serif; }
+  .a { position: absolute; margin: 0; box-sizing: border-box; }
+  #alto { position: absolute; left: 0; top: 0; width: 1px; height: 3000px; }
+</style>
+</head>
+<body>
+<div id="alto"></div>
+<h1 class="a" style="left:10px;top:10px;width:300px;height:30px;font-size:20px">Formulario de prueba</h1>
+<h2 class="a" id="cargando" style="left:400px;top:10px;width:200px;height:30px;font-size:16px">Cargando</h2>
+<input class="a" id="nombre" aria-label="Nombre" style="left:10px;top:60px;width:200px;height:24px" value="">
+<input class="a" id="clave" type="password" aria-label="Clave" style="left:10px;top:100px;width:200px;height:24px">
+<input class="a" id="tarjeta" autocomplete="cc-number" aria-label="Tarjeta" style="left:10px;top:140px;width:200px;height:24px">
+<input class="a" id="acepto" type="checkbox" aria-label="Acepto" style="left:10px;top:180px;width:20px;height:20px">
+<input class="a" id="basico" type="radio" name="plan" aria-label="Basico" style="left:10px;top:210px;width:20px;height:20px" checked>
+<input class="a" id="pro" type="radio" name="plan" aria-label="Pro" style="left:40px;top:210px;width:20px;height:20px">
+<select class="a" id="pais" aria-label="Pais" style="left:10px;top:240px;width:120px;height:24px"><option>Espana</option><option>Mexico</option></select>
+<button class="a" id="enviar" style="left:10px;top:280px;width:100px;height:30px">Enviar</button>
+<div class="a" id="zona" role="button" aria-label="Zona" style="left:400px;top:60px;width:200px;height:200px;background:#ddd"></div>
+<button class="a" id="tapado" style="left:10px;top:330px;width:100px;height:30px">Tapado</button>
+<div class="a" id="capa" style="left:0;top:320px;width:300px;height:50px;background:rgba(0,0,0,0.2)"></div>
+<script>
+  // Mundo principal de la página: registra lo que le llega como lo vería una app.
+  window.log = [];
+  const enviar = document.getElementById('enviar');
+  enviar.addEventListener('click', () => {
+    window.log.push('click');
+    setTimeout(() => {
+      enviar.textContent = 'Enviado';
+      document.getElementById('cargando').style.display = 'none';
+    }, 200);
+  });
+  document.getElementById('nombre').addEventListener('keydown', (e) => {
+    if (e.key === 'Enter') window.log.push('enter:' + e.target.value);
+  });
+  document.getElementById('pais').addEventListener('change', (e) => window.log.push('change:' + e.target.value));
+  const zona = document.getElementById('zona');
+  let origen = null;
+  zona.addEventListener('mouseenter', () => window.log.push('hover'));
+  zona.addEventListener('mousedown', (e) => { origen = [e.clientX, e.clientY]; });
+  window.addEventListener('mouseup', (e) => {
+    if (origen) window.log.push('drag:' + (e.clientX - origen[0]) + ',' + (e.clientY - origen[1]));
+    origen = null;
+  });
+</script>
+</body>
+</html>

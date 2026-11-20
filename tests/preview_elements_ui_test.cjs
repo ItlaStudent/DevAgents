@@ -1,0 +1,81 @@
+const assert = require('node:assert/strict');
+const fs = require('node:fs');
+const path = require('node:path');
+const source = path.resolve(__dirname, '../shell/webui/src/preview_elements.ts');
+assert.ok(fs.existsSync(source), 'E5.25: falta receptor y recorte de elementos');
+function load(name, imports={}) {
+  const mod = { exports:{} };
+  new Function('module','exports','require',fs.readFileSync(path.resolve(__dirname,`../shell/webui/dist/${name}.test.cjs`),'utf8'))(mod,mod.exports,n=>imports[n]??{});
+  return mod.exports;
+}
+const images=load('image_attachments_preview');
+const preview=load('preview_elements',{'./image_attachments':images});
+const { parsePickedElementPayload, cropBounds, capturePickedElement, relativePreviewPath, openPreviewArtifact, installPickedElementReceiver }=preview;
+let checks=0;
+function check(name,fn){fn();checks++;console.log(`ok ${name}`);}
+function png(w,h){const b=new Uint8Array(33);b.set([137,80,78,71,13,10,26,10,0,0,0,13,73,72,68,82]);const v=new DataView(b.buffer);v.setUint32(16,w);v.setUint32(20,h);return b;}
+const viewport={width:100,height:80,devicePixelRatio:2};
+function payload(){return {order_id:1,window_id:2,element:{kind:'element_picked',selector:'#fixture-button',outerHTML:'<button id="fixture-button">Cambiar</button>',box:{x:10,y:12,width:30,height:20},styles:{color:'rgb(0,0,0)',backgroundColor:'blue',fontSize:'14px',fontFamily:'sans-serif',fontWeight:'400',display:'block',position:'static',borderRadius:'0px'},path:'/fixture.html',viewport:{...viewport}},viewport:{...viewport},capture_base64:Buffer.from(png(200,160)).toString('base64')};}
+check('esquema de host aceptado',()=>assert.equal(parsePickedElementPayload(payload()).order_id,1));
+check('esquemas desconocidos rechazados',()=>{for(const change of [p=>p.extra=1,p=>p.element.kind='order_submit',p=>p.element.styles.extra='evil',p=>delete p.element.selector]){const p=payload();change(p);assert.throws(()=>parsePickedElementPayload(p));}});
+check('HTML, selector y ruta acotados por bytes',()=>{for(const [key,max] of [['outerHTML',8192],['selector',1024],['path',2048]]){const p=payload();p.element[key]='á'.repeat(max);assert.throws(()=>parsePickedElementPayload(p),/cota/);}});
+check('box y viewport finitos y dentro de captura',()=>{for(const change of [p=>p.element.box.x=-1,p=>p.element.box.width=1000,p=>p.element.box.y=NaN,p=>p.viewport.width=9000,p=>p.viewport.devicePixelRatio=9,p=>p.element.viewport.width=50]){const p=payload();change(p);assert.throws(()=>parsePickedElementPayload(p));}});
+check('captura base64 acotada y estricta',()=>{for(const b64 of ['notbase64!', 'A'.repeat(6990512)]){const p=payload();p.capture_base64=b64;assert.throws(()=>parsePickedElementPayload(p));}});
+check('identidades y estilos inválidos rechazados',()=>{for(const change of [p=>p.order_id=0,p=>p.window_id=1.5,p=>p.element.styles.color='x'.repeat(257),p=>p.element.selector='bad\nselector']){const p=payload();change(p);assert.throws(()=>parsePickedElementPayload(p));}});
+check('recorte usa escala real de bitmap para DPI',()=>assert.deepEqual(cropBounds(payload().element.box,viewport,200,160),{x:20,y:24,width:60,height:40}));
+check('recorte redondea extremos sin salir',()=>assert.deepEqual(cropBounds({x:0.2,y:0.3,width:99.8,height:79.7},viewport,125,100),{x:0,y:0,width:125,height:100}));
+check('bitmap y recorte inválidos rechazados',()=>{assert.throws(()=>cropBounds(payload().element.box,viewport,0,160));assert.throws(()=>cropBounds(payload().element.box,viewport,9000,160));});
+check('ruta relativa desde worktree motor',()=>{assert.equal(relativePreviewPath('C:\\work\\index.html','c:/work'),'index.html');assert.equal(relativePreviewPath('pages/index.html','C:/work'),'pages/index.html');});
+check('rutas externas o escape rechazadas',()=>{for(const p of ['C:/other/index.html','../index.html','pages/../index.html','/index.html','https://example/index.html','index.html?secret=1'])assert.throws(()=>relativePreviewPath(p,'C:/work'));});
+check('path vacío y absoluto sin raíz rechazados',()=>{assert.throws(()=>relativePreviewPath(''));assert.throws(()=>relativePreviewPath('C:/work/index.html'));});
+(async()=>{
+  let draw,closed=0;
+  global.createImageBitmap=async()=>({width:200,height:160,close(){closed++;}});
+  global.document={createElement(){return {width:0,height:0,getContext(){return {drawImage(...args){draw=args;}};},toBlob(cb){cb(new Blob([png(60,40)],{type:'image/png'}));}};}};
+  const result=await capturePickedElement(payload());assert.equal(result.file.name,'elemento-orden-1-ventana-2.png');assert.equal(result.file.type,'image/png');assert.match(result.context,/Orden origen: #1/);assert.match(result.context,/fixture-button/);assert.match(result.context,/<button/);assert.equal(closed,1);assert.deepEqual(draw.slice(1),[20,24,60,40,0,0,60,40]);checks++;console.log('ok canvas recorta y contexto queda texto');
+  const corrupt=payload();corrupt.capture_base64=Buffer.from('not PNG').toString('base64');await assert.rejects(capturePickedElement(corrupt));checks++;console.log('ok captura corrupta rechazada');
+  const decodedOversized=payload();decodedOversized.capture_base64=Buffer.alloc(5*1024*1024+1).toString('base64');await assert.rejects(capturePickedElement(decodedOversized),/5 MB/);checks++;console.log('ok límite de bytes también tras decodificar base64');
+  global.createImageBitmap=async()=>{throw new Error('decode failed');};await assert.rejects(capturePickedElement(payload()),/decode failed/);checks++;console.log('ok error de decodificación propagado');
+  global.createImageBitmap=async()=>({width:200,height:160,close(){closed++;}});
+  global.document.createElement=()=>({getContext:()=>null});await assert.rejects(capturePickedElement(payload()),/canvas/);checks++;console.log('ok canvas sin contexto falla explícito');
+  global.document.createElement=()=>({getContext:()=>({drawImage(){}}),toBlob(cb){cb(null);}});await assert.rejects(capturePickedElement(payload()),/PNG/);checks++;console.log('ok codificación nula falla explícito');
+  global.document.createElement=()=>({getContext:()=>({drawImage(){}}),toBlob(cb){cb(new Blob([new Uint8Array(5*1024*1024+1)]));}});await assert.rejects(capturePickedElement(payload()),/5 MB/);checks++;console.log('ok recorte codificado también acotado');
+  global.createImageBitmap=async()=>({width:201,height:160,close(){closed++;}});await assert.rejects(capturePickedElement(payload()),/cabecera/);checks++;console.log('ok bitmap que no coincide con PNG rechazado');
+  global.createImageBitmap=async()=>({width:200,height:160,close(){closed++;}});
+  let sent;
+  await openPreviewArtifact(5,'C:/work/fixture.html',{orderWorktree:async()=>({path:'C:/work'})},{send:async(kind,request)=>{sent={kind,request};}});
+  assert.deepEqual(sent,{kind:'window.open',request:{vista:'preview',order_id:5,path:'fixture.html'}});checks++;console.log('ok abrir deriva raíz del motor y envía solo relativo');
+  await assert.rejects(openPreviewArtifact(0,'index.html',{},{}));
+  await assert.rejects(openPreviewArtifact(5,'index.html',{orderWorktree:async()=>{throw new Error('no order');}},{}),/no order/);checks++;console.log('ok orden ausente y error motor bloquean apertura');
+  await assert.rejects(openPreviewArtifact(5,'index.html',{orderWorktree:async()=>({path:''})},{}),/worktree/);
+  await assert.rejects(openPreviewArtifact(5,'index.html',{orderWorktree:async()=>({path:'C:/work'})},{send:async()=>{throw new Error('host rejected');}}),/host rejected/);checks++;console.log('ok raíz vacía y rechazo host propagan error');
+  global.document.createElement=()=>({getContext:()=>({drawImage(){}}),toBlob(cb){cb(new Blob([png(60,40)],{type:'image/png'}));}});
+  let listener,subscriptions=0,shown=0,attachments=0,release;const messages=[];
+  const bridge={onPush(cb){subscriptions++;listener=cb;return ()=>{subscriptions--;};}};
+  const opts={primary:false,showComposer(){shown++;},attach:async()=>{attachments++;return true;},report:msg=>messages.push(msg)};
+  assert.equal(installPickedElementReceiver(bridge,opts),null);assert.equal(subscriptions,0);checks++;console.log('ok secundaria no recibe selección ni duplica confirmación');
+  const unsubscribe=installPickedElementReceiver(bridge,{...opts,primary:true});listener('doc.saved',payload());await new Promise(r=>setImmediate(r));assert.equal(attachments,0);checks++;console.log('ok otros push no son selecciones');
+  listener('preview.elementPicked',{unsafe:true});await new Promise(r=>setImmediate(r));assert.equal(attachments,0);assert.match(messages.at(-1),/esquema|campos/);checks++;console.log('ok push mal formado no adjunta y muestra error');
+  listener('preview.elementPicked',payload());await new Promise(r=>setImmediate(r));assert.equal(shown,1);assert.equal(attachments,1);checks++;console.log('ok selección abre compositor y pasa captura a confirmación E5.23');unsubscribe();assert.equal(subscriptions,0);
+  const unsubscribe2=installPickedElementReceiver(bridge,{...opts,primary:true,attach:()=>new Promise(resolve=>{attachments++;release=resolve;})});
+  listener('preview.elementPicked',payload());await new Promise(r=>setImmediate(r));listener('preview.elementPicked',payload());assert.match(messages.at(-1),/Confirma o cancela/);assert.equal(attachments,2);checks++;console.log('ok diálogo pendiente bloquea segunda selección');
+  release(false);await new Promise(r=>setImmediate(r));listener('preview.elementPicked',payload());await new Promise(r=>setImmediate(r));assert.equal(attachments,3);release(false);await new Promise(r=>setImmediate(r));unsubscribe2();checks++;console.log('ok cancelación vuelve a habilitar seleccionar');
+  const unsubscribe3=installPickedElementReceiver(bridge,{...opts,primary:true,attach:async()=>{throw new Error('confirmation failed');}});listener('preview.elementPicked',payload());await new Promise(r=>setImmediate(r));assert.match(messages.at(-1),/confirmation failed/);unsubscribe3();checks++;console.log('ok error de confirmación visible sin rechazo huérfano');
+  const {UiActionDispatcher}=load('ui_actions_preview',{'./preview_elements':preview,'./design/notice':{notice(){}}});
+  const acks=[],opened=[];const actionCore={uiActionAck:async(id,ok,detail)=>{acks.push({id,ok,detail});}};
+  const dispatcher=new UiActionDispatcher(actionCore,{openWindow:async request=>{opened.push(request);return {window_id:2};}});
+  await dispatcher.handleOrderEvent(1,{action:'open_window',args:{vista:'preview',order_id:1,path:'fixture.html'}});
+  assert.deepEqual(opened[0],{vista:'preview',order_id:1,path:'fixture.html'});assert.equal(acks.at(-1).ok,true);checks++;console.log('ok ui_action MCP abre preview de orden con ruta relativa');
+  await dispatcher.handleOrderEvent(2,{action:'open_window',args:{vista:'preview',order_id:2}});assert.equal(opened[1].path,'index.html');checks++;console.log('ok preview sin path usa index.html permitido por host');
+  const badArgs=[{vista:'preview',path:'fixture.html'},{vista:'preview',order_id:1.5,path:'fixture.html'},{vista:'preview',order_id:'2',path:'fixture.html'},{vista:'preview',order_id:1,path:'../fixture.html'},{vista:'preview',order_id:1,path:'C:/private.html'},{vista:'preview',order_id:1,path:'https://evil/index.html'},{vista:'preview',order_id:1,path:'fixture.html?token=evil'}];
+  for(let i=0;i<badArgs.length;i++){await dispatcher.handleOrderEvent(3+i,{action:'open_window',args:badArgs[i]});assert.equal(acks.at(-1).ok,false);assert.equal(opened.length,2);}
+  checks++;console.log('ok ui_action rechaza falta de orden y rutas maliciosas sin abrir');
+  const {ChatPanel}=load('chat_panel_preview',{'../design/html':load('html_preview'),'../design/icons':{icons:new Proxy({},{get:()=>()=>''})},'../file_runtime':{artifactAction:()=>({runner:null})}});
+  const chat=Object.create(ChatPanel.prototype);const previewButton={dataset:{preview:'C:/work/fixture.html'},addEventListener(name,cb){this[name]=cb;}};
+  const changes={innerHTML:'',querySelectorAll:s=>s==='[data-preview]'?[previewButton]:[]};const changesBox={style:{}};
+  chat.container={querySelector:s=>({'#chat-changes-list':changes,'#chat-changes':changesBox})[s]??null};chat.changed=new Map([['C:/work/fixture.html','file_written']]);chat.artifactEvents=[];
+  chat.renderChanges();assert.match(changes.innerHTML,/data-preview="C:\/work\/fixture.html"/);assert.match(changes.innerHTML,/Vista previa y señalar un elemento/);checks++;console.log('ok artefacto HTML directo ofrece selector de vista previa');
+  let emitted;global.document.dispatchEvent=event=>{emitted=event;};previewButton.click({stopPropagation(){}});
+  assert.equal(emitted.type,'devagents:preview-artifact');assert.deepEqual(emitted.detail,{path:'C:/work/fixture.html'});checks++;console.log('ok clic de preview conecta con acción principal');
+  console.log(`${checks} checks PASS`);
+})().catch(e=>{console.error(e);process.exitCode=1;});

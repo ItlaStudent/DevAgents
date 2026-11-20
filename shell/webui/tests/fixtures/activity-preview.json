@@ -1,0 +1,124 @@
+[
+  {
+    "id": 1,
+    "kind": "order_running",
+    "title": "Orden iniciada",
+    "payload": {
+      "order_id": 437
+    },
+    "source": "engine",
+    "severity": "info",
+    "ts": 1700000000000
+  },
+  {
+    "id": 2,
+    "kind": "superagent_thinking",
+    "title": "Preparando la ejecución",
+    "payload": {
+      "text": "Crear la página y comprobar el comportamiento."
+    },
+    "source": "engine",
+    "severity": "info",
+    "ts": 1700000060000
+  },
+  {
+    "id": 3,
+    "kind": "task_started",
+    "title": "Creando la página",
+    "payload": {
+      "task_id": 1,
+      "department": "Frontend",
+      "description": "Crear la calculadora",
+      "task_type": "construir",
+      "worker_id": 1
+    },
+    "source": "engine",
+    "severity": "info",
+    "ts": 1700000120000
+  },
+  {
+    "id": 4,
+    "kind": "file_written",
+    "title": "Archivo guardado",
+    "payload": {
+      "task_id": 1,
+      "artifact_name": "index.html",
+      "file_path": "index.html"
+    },
+    "source": "engine",
+    "severity": "info",
+    "ts": 1700000180000
+  },
+  {
+    "id": 5,
+    "kind": "task_done",
+    "title": "Página terminada",
+    "payload": {
+      "task_id": 1,
+      "worker_id": 1,
+      "success": true,
+      "integrated": true
+    },
+    "source": "engine",
+    "severity": "info",
+    "ts": 1700000240000
+  },
+  {
+    "id": 6,
+    "kind": "task_started",
+    "title": "Comprobando la división",
+    "payload": {
+      "task_id": 2,
+      "department": "Pruebas",
+      "description": "Verificar la división por cero",
+      "task_type": "test",
+      "worker_id": 2
+    },
+    "source": "engine",
+    "severity": "info",
+    "ts": 1700000300000
+  },
+  {
+    "id": 7,
+    "kind": "content_delta",
+    "title": "Ejecutando la comprobación",
+    "payload": {
+      "task_id": 2,
+      "content": "Comprobando el resultado con divisor cero."
+    },
+    "source": "engine",
+    "severity": "info",
+    "ts": 1700000360000
+  },
+  {
+    "id": 8,
+    "kind": "order_failed",
+    "title": "Orden terminada con errores",
+    "payload": {
+      "cause": "Falló la comprobación de la división por cero",
+      "completed": 1,
+      "failed": 1,
+      "integrated": 1,
+      "has_pending_approvals": false
+    },
+    "source": "engine",
+    "severity": "error",
+    "ts": 1700000420000
+  },
+  {
+    "id": 9,
+    "kind": "task_failed",
+    "title": "Comprobación fallida",
+    "payload": {
+      "task_id": 2,
+      "worker_id": 2,
+      "success": false,
+      "integrated": false,
+      "cause": "Resultado inesperado",
+      "error_msg": "La división por cero debe mostrar un aviso."
+    },
+    "source": "engine",
+    "severity": "error",
+    "ts": 1700000480000
+  }
+]

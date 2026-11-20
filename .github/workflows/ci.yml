@@ -1,0 +1,196 @@
+# CI de DevAgents (F0.3, tanda 11 del plan de frontera).
+#
+# - En cada PR y push a main: compila y pasa el subconjunto rápido (mismas
+#   comprobaciones que el gancho de commit, typecheck, test-webui y test-bridge).
+# - Cada noche: la suite completa `zig build test`.
+#
+# Mientras el repositorio no sea público ningún job corre (condición
+# `github.event.repository.visibility == 'public'`), para no gastar minutos; con
+# workflow_dispatch se puede lanzar a mano y entonces sí corre aunque sea
+# privado. No usa secretos.
+#
+# Las acciones van fijadas por versión mayor, no por SHA: el SHA no se pudo
+# comprobar sin red al escribir el flujo. Fijarlas por SHA antes de publicar.
+
+name: CI
+
+on:
+  pull_request:
+  push:
+    branches: [main]
+  schedule:
+    # 03:17 UTC todas las noches.
+    - cron: "17 3 * * *"
+  workflow_dispatch:
+    inputs:
+      suite_completa:
+        description: "Correr también la suite completa (job nocturno)"
+        type: boolean
+        default: false
+
+permissions:
+  contents: read
+
+concurrency:
+  group: ci-${{ github.workflow }}-${{ github.event.pull_request.number || github.ref }}
+  cancel-in-progress: ${{ github.event_name == 'pull_request' }}
+
+env:
+  # Mismos valores que DevAgents.bat (ZIG_URL, ZIG_SHA256, ZIG_SIZE).
+  ZIG_VERSION: "0.16.0"
+  ZIG_URL: "https://ziglang.org/download/0.16.0/zig-x86_64-windows-0.16.0.zip"
+  ZIG_SHA256: "68659eb5f1e4eb1437a722f1dd889c5a322c9954607f5edcf337bc3684a75a7e"
+  ZIG_SIZE: "97217739"
+  # La versión de Node que usa el equipo (v24.14.1 medido el 12-nov-2026);
+  # el proyecto no fija versión (package-lock pide >=18).
+  NODE_VERSION: "24"
+
+defaults:
+  run:
+    shell: pwsh
+
+jobs:
+  pr:
+    name: Compilar y subconjunto rápido
+    if: ${{ (github.event_name == 'workflow_dispatch' || github.event.repository.visibility == 'public') && github.event_name != 'schedule' }}
+    runs-on: windows-latest
+    timeout-minutes: 60
+    steps:
+      - name: Checkout (historial completo para el control de secretos)
+        uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+          persist-credentials: false
+
+      # El contexto runner no se puede usar en el env del job: las rutas se
+      # fijan aquí para todos los pasos siguientes.
+      - name: Rutas de caché y salida
+        run: |
+          "ZIG_CACHE=$env:RUNNER_TEMP\zig-cache" >> $env:GITHUB_ENV
+          "ZIG_GLOBAL_CACHE_DIR=$env:RUNNER_TEMP\zig-global-cache" >> $env:GITHUB_ENV
+          "CI_PREFIX=$env:RUNNER_TEMP\devagents-out" >> $env:GITHUB_ENV
+
+      - name: Instalar Zig 0.16.0 (SHA-256 verificado)
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'zig.zip'
+          $ProgressPreference = 'SilentlyContinue'
+          Invoke-WebRequest -Uri $env:ZIG_URL -OutFile $zip -UseBasicParsing
+          $len = (Get-Item $zip).Length
+          $sha = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLowerInvariant()
+          if ($len -ne [int64]$env:ZIG_SIZE -or $sha -ne $env:ZIG_SHA256) {
+            throw "El zip de Zig no coincide con el publicado (tamano $len, SHA-256 $sha; se esperaba $env:ZIG_SIZE y $env:ZIG_SHA256)"
+          }
+          Expand-Archive -Path $zip -DestinationPath $env:RUNNER_TEMP -Force
+          $dir = Join-Path $env:RUNNER_TEMP "zig-x86_64-windows-$env:ZIG_VERSION"
+          $dir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          & "$dir\zig.exe" version
+
+      - name: Instalar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: shell/webui/package-lock.json
+
+      - name: Caché de Zig
+        uses: actions/cache@v4
+        with:
+          path: |
+            ${{ env.ZIG_CACHE }}
+            ${{ env.ZIG_GLOBAL_CACHE_DIR }}
+          key: zig-${{ runner.os }}-${{ env.ZIG_VERSION }}-${{ github.sha }}
+          restore-keys: |
+            zig-${{ runner.os }}-${{ env.ZIG_VERSION }}-
+
+      - name: Dependencias de la cabina (npm ci)
+        working-directory: shell/webui
+        run: npm ci --no-audit --no-fund
+
+      - name: Control de secretos (gancho, paso 0)
+        run: pwsh -NoProfile -File tools/secrets_check.ps1
+
+      - name: Formato de Zig (gancho, paso 1)
+        run: zig fmt --check build.zig core providers tests
+
+      # Mismo filtro de archivos que tools/hooks/pre-commit.ps1. El repositorio
+      # no tiene .clang-format: se aplica el estilo LLVM por defecto, y la
+      # versión del runner puede no ser la del equipo (22.1.7 el 12-nov-2026).
+      - name: Formato de C/C++ (gancho, paso 2)
+        run: |
+          clang-format --version
+          $cFiles = Get-ChildItem -Path . -Include *.c,*.cpp,*.h,*.hpp -Recurse | Where-Object { $_.FullName -notmatch "\\.zig-cache|zig-cache|[\\/]core[\\/](src[\\/])?db|[\\/]build[\\/]|CMakeFiles|devagents-workspace|[\\/]almacen[\\/]|[\\/]toolchain[\\/]|[\\/]tools[\\/]vendor[\\/]|\.def$" }
+          $mal = @()
+          foreach ($f in $cFiles) {
+            clang-format --dry-run --Werror --style=file $f.FullName
+            if ($LASTEXITCODE -ne 0) { $mal += $f.FullName }
+          }
+          "Archivos revisados: $($cFiles.Count); con formato distinto: $($mal.Count)"
+          if ($mal.Count -gt 0) { $mal; exit 1 }
+
+      - name: Tipos de la WebUI (typecheck)
+        run: zig build typecheck -j1 --cache-dir "$env:ZIG_CACHE" --prefix "$env:CI_PREFIX" --summary all
+
+      - name: Compilar runtime-binaries (gancho, paso 3)
+        run: zig build runtime-binaries -j1 --cache-dir "$env:ZIG_CACHE" --prefix "$env:CI_PREFIX" --summary all
+
+      - name: Pruebas de la interfaz (test-webui)
+        run: zig build test-webui -j1 --cache-dir "$env:ZIG_CACHE" --prefix "$env:CI_PREFIX" --summary all
+
+      - name: Pruebas del puente (test-bridge)
+        run: zig build test-bridge -j1 --cache-dir "$env:ZIG_CACHE" --prefix "$env:CI_PREFIX" --summary all
+
+      # Pasos de prueba que en local tardan menos de un minuto cada uno, sin
+      # red ni datos del usuario. test-project-search (presupuesto de 2 s) y
+      # test-core quedan para la suite nocturna.
+      - name: Pruebas rápidas del host, MCP y proveedores
+        run: zig build test-origin-policy test-bridge-policy test-mcp test-hunk-mgr test-doc-mgr test-pty-mgr test-lsp-client test-app-windows test-providers -j1 --cache-dir "$env:ZIG_CACHE" --prefix "$env:CI_PREFIX" --summary all
+
+  nocturno:
+    name: Suite completa (nocturna)
+    if: ${{ (github.event_name == 'schedule' && github.event.repository.visibility == 'public') || (github.event_name == 'workflow_dispatch' && inputs.suite_completa) }}
+    runs-on: windows-latest
+    timeout-minutes: 240
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v4
+        with:
+          persist-credentials: false
+
+      # El contexto runner no se puede usar en el env del job: las rutas se
+      # fijan aquí para todos los pasos siguientes.
+      - name: Rutas de caché y salida
+        run: |
+          "ZIG_CACHE=$env:RUNNER_TEMP\zig-cache" >> $env:GITHUB_ENV
+          "ZIG_GLOBAL_CACHE_DIR=$env:RUNNER_TEMP\zig-global-cache" >> $env:GITHUB_ENV
+          "CI_PREFIX=$env:RUNNER_TEMP\devagents-out" >> $env:GITHUB_ENV
+
+      - name: Instalar Zig 0.16.0 (SHA-256 verificado)
+        run: |
+          $zip = Join-Path $env:RUNNER_TEMP 'zig.zip'
+          $ProgressPreference = 'SilentlyContinue'
+          Invoke-WebRequest -Uri $env:ZIG_URL -OutFile $zip -UseBasicParsing
+          $len = (Get-Item $zip).Length
+          $sha = (Get-FileHash -Algorithm SHA256 $zip).Hash.ToLowerInvariant()
+          if ($len -ne [int64]$env:ZIG_SIZE -or $sha -ne $env:ZIG_SHA256) {
+            throw "El zip de Zig no coincide con el publicado (tamano $len, SHA-256 $sha; se esperaba $env:ZIG_SIZE y $env:ZIG_SHA256)"
+          }
+          Expand-Archive -Path $zip -DestinationPath $env:RUNNER_TEMP -Force
+          $dir = Join-Path $env:RUNNER_TEMP "zig-x86_64-windows-$env:ZIG_VERSION"
+          $dir | Out-File -FilePath $env:GITHUB_PATH -Encoding utf8 -Append
+          & "$dir\zig.exe" version
+
+      - name: Instalar Node
+        uses: actions/setup-node@v4
+        with:
+          node-version: ${{ env.NODE_VERSION }}
+          cache: npm
+          cache-dependency-path: shell/webui/package-lock.json
+
+      - name: Dependencias de la cabina (npm ci)
+        working-directory: shell/webui
+        run: npm ci --no-audit --no-fund
+
+      # Caché nueva a propósito: con una caché reutilizada salen rojos que no
+      # se reproducen.
+      - name: Suite completa
+        run: zig build test -j1 --cache-dir "$env:ZIG_CACHE" --prefix "$env:CI_PREFIX" --summary all

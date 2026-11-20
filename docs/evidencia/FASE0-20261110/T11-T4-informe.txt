@@ -1,0 +1,10 @@
+Extracto revisado / Reviewed excerpt
+
+ARCHIVOS TOCADOS
+- .github/workflows/ci.yml (nuevo)
+- tools/test_installed_package_smoke.ps1 (corregido; ahora UTF-8 con BOM para que PowerShell 5.1 lea bien las tildes)
+- El paso de instalacion de Zig (descarga, SHA-256, Expand-Archive, GITHUB_PATH): en local se uso el Zig ya instalado.
+- setup-node con cache npm, actions/cache, la condicion de repositorio privado, concurrency y schedule.
+- Version de clang-format del runner (en local 22.1.7): puede dar formato distinto y rojos falsos. Es lo primero a mirar en la primera ejecucion.
+- Tiempos reales en el runner (cache fria) y que Chrome/Edge de la imagen sirvan a las pruebas de interfaz por CDP (en local las resolvio el navegador del equipo).
+- SHA de las acciones: pendientes de fijar.

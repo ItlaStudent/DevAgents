@@ -1,0 +1,17 @@
+Extracto revisado / Reviewed excerpt
+
+Tareas:
+  [t1] Implementar la solución conforme a la orden: Crea un archivo hola.txt con el texto: hola desde Linux (programar_zig) → modelo: none/none free=false sandbox=sandbox/t1
+  [t3] Auditar la implementación por un modelo distinto al constructor (auditar) → modelo: none/none free=false sandbox=sandbox/t3
+
+Ejecución: 1 completadas, 0 fallidas.
+Integración por contrato: 1 integradas, 0 rechazadas.
+Paralelismo máximo (tareas simultáneas): 1
+
+Auto-auditoría: 1 pasadas, 0 falladas, 0 corregidas.
+Auditoría de modelos: 1 tarea(s) de auditoría sin veredicto usable — la orden queda SIN AUDITAR (la entrega sigue bloqueada hasta un reintento manual).
+== MCP por stdio: initialize, tools/list y una tool de lectura
+exit=0
+initialize: {'name': 'devagents-mcp', 'version': '0.1.0/abi1.bus1.ui1'} protocol 2024-11-05
+tools/list: 121 tools; primeras: ['authenticate', 'health', 'health_probe_all', 'catalog_info', 'router_candidates', 'sessions', 'session_messages', 'session_timeline']
+DOCKER_EXIT=0
